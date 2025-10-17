@@ -1,0 +1,23 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<h4>Login Page</h4>
+<form method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+    <div class="form-group">
+        <label asp-for="request.Email" class="form-label">Email</label>
+        <input asp-for="request.Email" class="form-text" />
+        <span asp-validation-for="request.Email" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="request.Password" class="form-label">Password</label>
+        <input asp-for="request.Password" type="password" class="form-text" />
+        <span asp-validation-for="request.Password" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Login</button>
+    </div>
+</form>
