@@ -37,7 +37,7 @@ namespace FPP.Infrastructure.Implements.Services
 
             var user = userList.FirstOrDefault();
             if(user == null) return false;
-            if (user.PasswordHash != request.Password) return false;
+            if (!_bcryptHelper.VerifyPassword(request.Password, user.PasswordHash)) return false;
             rs = true;
             Console.WriteLine(rs);
             return rs;
@@ -88,6 +88,8 @@ namespace FPP.Infrastructure.Implements.Services
                 Name = user.Name,
                 Email = user.Email,
                 PasswordHash = _bcryptHelper.HashPassword(user.Password),
+                Role = 1,
+                CreatedAt = DateTime.UtcNow
             };
             _unitOfWork.Users.Add(userEntity);
             var cltrs = await _unitOfWork.CompleteAsync();

@@ -7,6 +7,7 @@
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,6 @@
     <style>
         @@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
-        /* ... (Keep ALL your existing CSS here) ... */
         * {
             margin: 0;
             padding: 0;
@@ -114,6 +114,44 @@
             .dot:nth-child(3) {
                 animation-delay: 0.4s;
             }
+
+        /* Alert Message */
+        .alert-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideInRight 0.5s ease;
+            max-width: 400px;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
 
         @@keyframes dotPulse {
             0%, 100% {
@@ -300,12 +338,9 @@
                 transform: translateY(0);
             }
 
-        /* Form Container */
         .form-container {
             position: relative;
-            /* Cập nhật chiều cao */
-            height: auto; /* Để form tự co giãn */
-            min-height: 450px;
+            height: 450px;
             perspective: 1000px;
         }
 
@@ -324,57 +359,14 @@
                 transform: scale(1) rotateY(0deg);
                 pointer-events: all;
                 z-index: 2;
-                position: relative; /* Cho phép form active xác định chiều cao */
             }
 
             .form-content.inactive {
                 opacity: 0;
                 transform: scale(0.9) rotateY(30deg);
                 z-index: 1;
-                position: absolute; /* Giữ form inactive ở ngoài luồng */
             }
 
-        /* === THÊM CSS CHO THÔNG BÁO LỖI/THÀNH CÔNG === */
-        .form-message-box {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-            display: none; /* Ẩn mặc định */
-            text-align: center;
-        }
-
-            .form-message-box.error {
-                background-color: rgba(255, 69, 53, 0.1);
-                border-color: rgba(255, 69, 53, 0.5);
-                color: #ff4535;
-                display: block; /* Sẽ được JS bật lên */
-            }
-
-            .form-message-box.success {
-                background-color: rgba(48, 209, 88, 0.1);
-                border-color: rgba(48, 209, 88, 0.5);
-                color: #30d158;
-                display: block; /* Sẽ được JS bật lên */
-            }
-
-        /* Hiển thị lỗi validation của từng input */
-        .field-validation-error { /* Class mặc định của asp-validation-for */
-            font-family: 'Rajdhani', sans-serif;
-            color: #ff4535;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: block;
-            margin-top: 8px;
-            padding-left: 5px;
-        }
-        /* === KẾT THÚC CSS MỚI === */
-
-
-        /* Input styles */
         .form-group {
             margin-bottom: 25px;
             position: relative;
@@ -463,7 +455,6 @@
                 transition: all 0.3s;
                 font-weight: 600;
                 position: relative;
-                cursor: pointer; /* Thêm con trỏ */
             }
 
                 .remember-forgot a::after {
@@ -558,7 +549,7 @@
                 font-weight: 600;
                 position: relative;
                 transition: all 0.3s;
-                cursor: pointer; /* Thêm con trỏ */
+                cursor: pointer;
             }
 
                 .switch-link a::after {
@@ -581,7 +572,6 @@
                     text-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
                 }
 
-        /* === NEW CSS FOR OTP FORM === */
         .otp-instruction {
             color: #ccc;
             font-size: 1rem;
@@ -590,11 +580,6 @@
             line-height: 1.5;
             font-weight: 500;
         }
-            /* Style cho email trong instruction */
-            .otp-instruction strong {
-                color: #f7931e;
-                font-weight: 700;
-            }
 
         .otp-inputs {
             display: flex;
@@ -635,14 +620,6 @@
                     transform: translateY(-3px) scale(1.05);
                     box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.3), 0 10px 40px rgba(255, 107, 53, 0.4);
                 }
-
-        /* Ẩn các trường mật khẩu mới trong form OTP mặc định */
-        .otp-new-password-fields {
-            display: none;
-        }
-
-        /* === END NEW CSS === */
-
 
         @@keyframes fadeInUp {
             from {
@@ -717,7 +694,7 @@
             }
 
             .form-container {
-                min-height: 480px; /* Cập nhật */
+                height: 480px;
             }
 
             .otp-inputs {
@@ -734,6 +711,13 @@
 </head>
 
 <body>
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+    <div class="alert-message alert-@Model.MessageType" id="alertMessage">
+        @Model.Message
+    </div>
+    }
+
     <div id="canvas-container"></div>
 
     <div class="intro-overlay" id="introOverlay">
@@ -764,173 +748,119 @@
                     <p class="login-subtitle" id="formSubtitle">Access Lab Booking System</p>
                 </div>
 
-                @if (!string.IsNullOrEmpty(Model.GeneralSuccessMessage))
-                {
-                    <div class="form-message-box success" id="generalSuccessMessage">
-                        @Model.GeneralSuccessMessage
-                    </div>
-                }
-
                 <div class="form-container">
-
-                    <form id="loginForm" class="form-content active" method="post">
-                        @Html.AntiForgeryToken()
-                        <div class="form-message-box" id="loginFormErrorMessage"></div>
-                        @if (!string.IsNullOrEmpty(Model.LoginErrorMessage))
-                        {
-                            <div class="form-message-box error">@Model.LoginErrorMessage</div>
-                        }
-
+                    <!-- LOGIN FORM -->
+                    <form id="loginForm" method="post" asp-page-handler="Login" class="form-content active">
                         <div class="form-group">
-                            <label asp-for="LoginRequest.Email"></label>
+                            <label for="email">Email</label>
                             <div class="input-wrapper">
-                                <input asp-for="LoginRequest.Email" type="email" placeholder="student@fpt.edu.vn" required>
+                                <input type="email" asp-for="LoginInput.Email" id="email" placeholder="student@fpt.edu.vn" required>
                                 <div class="input-icon"><i class="fas fa-envelope"></i></div>
                             </div>
-                            <span asp-validation-for="LoginRequest.Email"></span>
                         </div>
                         <div class="form-group">
-                            <label asp-for="LoginRequest.Password"></label>
+                            <label for="password">Password</label>
                             <div class="input-wrapper">
-                                <input asp-for="LoginRequest.Password" type="password" placeholder="Enter your password" required>
+                                <input type="password" asp-for="LoginInput.Password" id="password" placeholder="Enter your password" required>
                                 <div class="input-icon"><i class="fas fa-lock"></i></div>
                             </div>
-                            <span asp-validation-for="LoginRequest.Password"></span>
                         </div>
                         <div class="remember-forgot">
-                            <a id="showForgot">Forgot Password?</a>
+                            <a href="#" id="showForgot">Forgot Password?</a>
                         </div>
                         <button type="submit" class="login-btn">Login</button>
 
                         <div class="switch-link">
-                            Haven't account yet? <a id="showRegister">Register</a>
+                            Haven't account yet? <a href="#" id="showRegister">Register</a>
                         </div>
                     </form>
 
-                    <form id="registerForm" class="form-content" method="post">
-                        @Html.AntiForgeryToken()
-                        <div class="form-message-box" id="registerFormErrorMessage"></div>
-                        @if (!string.IsNullOrEmpty(Model.RegisterErrorMessage))
-                        {
-                            <div class="form-message-box error">@Model.RegisterErrorMessage</div>
-                        }
-
+                    <!-- REGISTER FORM -->
+                    <form id="registerForm" method="post" asp-page-handler="Register" class="form-content">
                         <div class="form-group">
-                            <label asp-for="RegisterRequest.Name"></label>
+                            <label for="regName">Name</label>
                             <div class="input-wrapper">
-                                <input asp-for="RegisterRequest.Name" type="text" placeholder="Adam Smith" required>
+                                <input type="text" asp-for="RegisterInput.Name" id="regName" placeholder="Adam Smith" required>
                                 <div class="input-icon"><i class="fas fa-user"></i></div>
                             </div>
-                            <span asp-validation-for="RegisterRequest.Name"></span>
+                            <span asp-validation-for="RegisterInput.Name" class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label asp-for="RegisterRequest.Email"></label>
+                            <label for="regEmail">Email</label>
                             <div class="input-wrapper">
-                                <input asp-for="RegisterRequest.Email" type="email" placeholder="student@fpt.edu.vn" required>
+                                <input type="email" asp-for="RegisterInput.Email" id="regEmail" placeholder="student@fpt.edu.vn" required>
                                 <div class="input-icon"><i class="fas fa-envelope"></i></div>
                             </div>
-                            <span asp-validation-for="RegisterRequest.Email"></span>
+                            <span asp-validation-for="RegisterInput.Email" class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label asp-for="RegisterRequest.Password"></label>
+                            <label for="regPassword">Password</label>
                             <div class="input-wrapper">
-                                <input asp-for="RegisterRequest.Password" type="password" placeholder="Use strong password" required>
+                                <input type="password" asp-for="RegisterInput.Password" id="regPassword" placeholder="Use strong password" required>
                                 <div class="input-icon"><i class="fas fa-lock"></i></div>
                             </div>
-                            <span asp-validation-for="RegisterRequest.Password"></span>
+                            <span asp-validation-for="RegisterInput.Password" class="text-danger"></span>
                         </div>
-                        <div class="form-group">
-                            <label asp-for="RegisterRequest.ConfirmPassword"></label>
-                            <div class="input-wrapper">
-                                <input asp-for="RegisterRequest.ConfirmPassword" type="password" placeholder="Confirm your password" required>
-                                <div class="input-icon"><i class="fas fa-lock"></i></div>
-                            </div>
-                            <span asp-validation-for="RegisterRequest.ConfirmPassword"></span>
-                        </div>
-
                         <button type="submit" class="login-btn">Register</button>
 
                         <div class="switch-link">
-                            Have account already? <a id="showLogin">Login</a>
+                            Have account already? <a href="#" id="showLogin">Login</a>
                         </div>
                     </form>
 
-                    <form id="forgotForm" class="form-content" method="post">
-                        @Html.AntiForgeryToken()
-                        <div class="form-message-box" id="forgotFormErrorMessage"></div>
-                        @if (!string.IsNullOrEmpty(Model.ForgotPasswordErrorMessage))
-                        {
-                            <div class="form-message-box error">@Model.ForgotPasswordErrorMessage</div>
-                        }
-
+                    <!-- FORGOT PASSWORD FORM -->
+                    <form id="forgotForm" method="post" asp-page-handler="ForgotPassword" class="form-content">
                         <div class="form-group">
-                            <label asp-for="ForgotPasswordRequest.Email"></label>
+                            <label for="forgotEmail">Email</label>
                             <div class="input-wrapper">
-                                <input asp-for="ForgotPasswordRequest.Email" type="email" placeholder="student@fpt.edu.vn" required>
+                                <input type="email" asp-for="ForgotPasswordInput.Email" id="forgotEmail" placeholder="student@fpt.edu.vn" required>
                                 <div class="input-icon"><i class="fas fa-envelope"></i></div>
                             </div>
-                            <span asp-validation-for="ForgotPasswordRequest.Email"></span>
+                            <span asp-validation-for="ForgotPasswordInput.Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" asp-for="ForgotPasswordInput.NewPassword" id="newPassword" placeholder="Use strong password" required>
+                                <div class="input-icon"><i class="fas fa-key"></i></div>
+                            </div>
+                            <span asp-validation-for="ForgotPasswordInput.NewPassword" class="text-danger"></span>
                         </div>
                         <button type="submit" class="login-btn">Send OTP</button>
 
                         <div class="switch-link">
-                            <a id="backToLogin">← Back to Login</a>
+                            <a href="#" id="backToLogin">← Back to Login</a>
                         </div>
                     </form>
 
-                    <form id="otpForm" class="form-content" method="post">
-                        @Html.AntiForgeryToken()
-                        <div class="form-message-box" id="otpFormErrorMessage"></div>
-                        @if (!string.IsNullOrEmpty(Model.VerifyRegisterErrorMessage))
-                        {
-                            <div class="form-message-box error">@Model.VerifyRegisterErrorMessage</div>
-                        }
-                        @if (!string.IsNullOrEmpty(Model.VerifyForgotPasswordErrorMessage))
-                        {
-                            <div class="form-message-box error">@Model.VerifyForgotPasswordErrorMessage</div>
-                        }
-
+                    <!-- OTP VERIFICATION FORM -->
+                    <form id="otpForm" method="post" class="form-content">
                         <p class="otp-instruction" id="otpInstruction">
-                            Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập vào bên dưới.
+                            @if (!string.IsNullOrEmpty(Model.CurrentEmail))
+                            {
+                            <text>OTP has been sent to: <strong>@Model.CurrentEmail</strong>. Please check your email and enter the code below.</text>
+                            }
+                            else
+                            {
+                            <text>Please enter the OTP code sent to your email.</text>
+                            }
                         </p>
                         <div class="form-group">
                             <div class="otp-inputs" id="otpInputs">
-                                <input type="text" inputmode="numeric" maxlength="1" required>
-                                <input type="text" inputmode="numeric" maxlength="1" required>
-                                <input type="text" inputmode="numeric" maxlength="1" required>
-                                <input type="text" inputmode="numeric" maxlength="1" required>
-                                <input type="text" inputmode="numeric" maxlength="1" required>
-                                <input type="text" inputmode="numeric" maxlength="1" required>
+                                <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" required>
+                                <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" required>
+                                <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" required>
+                                <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" required>
+                                <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" required>
+                                <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" required>
                             </div>
-                            <input type="hidden" id="combinedOtpInput" required />
-                            <input type="hidden" asp-for="VerifyRegisterRequest.OTP" id="VerifyRegisterRequest_OTP_Hidden" />
-                            <input type="hidden" asp-for="VerifyForgotPasswordRequest.OTP" id="VerifyForgotPasswordRequest_OTP_Hidden" />
-                            <span class="field-validation-error" id="otpCombinedValidationError"></span> @* Hiển thị lỗi OTP chung *@
+                            <input type="hidden" asp-for="OtpInput" id="otpHiddenInput">
                         </div>
 
-                        <div class="otp-new-password-fields" id="otpNewPasswordFields">
-                            <div class="form-group">
-                                <label asp-for="VerifyForgotPasswordRequest.NewPassword"></label>
-                                <div class="input-wrapper">
-                                    <input asp-for="VerifyForgotPasswordRequest.NewPassword" type="password" placeholder="Use strong password">
-                                    <div class="input-icon"><i class="fas fa-key"></i></div>
-                                </div>
-                                <span asp-validation-for="VerifyForgotPasswordRequest.NewPassword"></span>
-                            </div>
-                            <div class="form-group">
-                                <label asp-for="VerifyForgotPasswordRequest.ConfirmNewPassword"></label>
-                                <div class="input-wrapper">
-                                    <input asp-for="VerifyForgotPasswordRequest.ConfirmNewPassword" type="password" placeholder="Confirm new password">
-                                    <div class="input-icon"><i class="fas fa-key"></i></div>
-                                </div>
-                                <span asp-validation-for="VerifyForgotPasswordRequest.ConfirmNewPassword"></span>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="login-btn">Confirm</button>
+                        <button type="submit" class="login-btn" id="otpSubmitBtn">Verify OTP</button>
 
                         <div class="switch-link">
-                            <a id="otpBackToLogin">← Back to Login</a>
+                            <a href="#" id="otpBackToLogin">← Back to Login</a>
                         </div>
                     </form>
                 </div>
@@ -939,15 +869,9 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    @* KHÔNG CẦN jQuery validation nữa vì dùng AJAX *@
-    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script> *@
-
     <script>
-        // === THREE.JS BACKGROUND (giữ nguyên) ===
-        // ... (Your Three.js code remains here) ...
-         const scene = new THREE.Scene();
+        // === THREE.JS BACKGROUND ===
+        const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x000000, 0.015);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -956,6 +880,7 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.getElementById('canvas-container').appendChild(renderer.domElement);
         camera.position.z = 20;
+
         const cubes = [];
         for (let i = 0; i < 25; i++) {
             const size = 0.8 + Math.random() * 1.2;
@@ -979,6 +904,7 @@
             });
             scene.add(cube);
         }
+
         const particlesGeometry = new THREE.BufferGeometry();
         const particlesCount = 2000;
         const posArray = new Float32Array(particlesCount * 3);
@@ -995,6 +921,7 @@
         const particlesMaterial = new THREE.PointsMaterial({ size: 0.1, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
+
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
         scene.add(ambientLight);
         const lights = [];
@@ -1003,6 +930,7 @@
             lights.push(light);
             scene.add(light);
         }
+
         let time = 0;
         function animate() {
             requestAnimationFrame(animate);
@@ -1035,6 +963,7 @@
             renderer.render(scene, camera);
         }
         animate();
+
         const particleField = document.getElementById('particleField');
         for (let i = 0; i < 20; i++) {
             const p = document.createElement('div');
@@ -1045,357 +974,158 @@
             p.style.animationDuration = (3 + Math.random() * 2) + 's';
             particleField.appendChild(p);
         }
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-
-        // === DOCUMENT READY ===
-        document.addEventListener('DOMContentLoaded', () => {
-
-            // === FORM SWITCHING & INTRO LOGIC (Đã cập nhật) ===
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const forgotForm = document.getElementById('forgotForm');
-            const otpForm = document.getElementById('otpForm');
-            const showRegister = document.getElementById('showRegister');
-            const showLogin = document.getElementById('showLogin');
-            const showForgot = document.getElementById('showForgot');
-            const backToLogin = document.getElementById('backToLogin');
-            const otpBackToLogin = document.getElementById('otpBackToLogin');
-            const formTitle = document.getElementById('formTitle');
-            const formSubtitle = document.getElementById('formSubtitle');
-            const otpInstruction = document.getElementById('otpInstruction');
-            const otpNewPasswordFields = document.getElementById('otpNewPasswordFields');
-            const loginContainer = document.getElementById('loginContainer');
-            const introOverlay = document.getElementById('introOverlay');
-
-            let currentOtpMode = 'register'; // 'register' or 'forgot'
-
-            function switchTo(formToShow, title, subtitle, instruction = null) {
-                // Clear ALL error messages and validation highlights on switch
-                document.querySelectorAll('.form-message-box').forEach(box => {
-                    box.textContent = '';
-                    box.className = 'form-message-box'; // Reset class
-                });
-                document.querySelectorAll('.field-validation-error').forEach(span => {
-                    span.textContent = ''; // Clear individual validation errors
-                });
-                 document.querySelectorAll('.input-validation-error').forEach(input => {
-                    input.classList.remove('input-validation-error'); // Remove red border if any
-                });
-
-
-                [loginForm, registerForm, forgotForm, otpForm].forEach(f => {
-                    f.classList.remove('active', 'inactive');
-                    if (f === formToShow) f.classList.add('active');
-                    else f.classList.add('inactive');
-                });
-
-                formTitle.classList.remove('show');
-                formSubtitle.classList.remove('show');
-
+        // === ALERT MESSAGE AUTO HIDE ===
+        const alertMessage = document.getElementById('alertMessage');
+        if (alertMessage) {
+            setTimeout(() => {
+                alertMessage.style.animation = 'slideInRight 0.5s ease reverse';
                 setTimeout(() => {
-                    formTitle.textContent = title;
-                    formSubtitle.textContent = subtitle;
-                    formTitle.classList.add('show');
-                    formSubtitle.classList.add('show');
+                    alertMessage.remove();
+                }, 500);
+            }, 5000);
+        }
 
-                    if (instruction) {
-                        otpInstruction.innerHTML = instruction;
-                    }
+        // === INTRO TO LOGIN ===
+        const otpType = '@Model.OtpType';
+        const hasMessage = '@Model.Message' !== '';
 
-                    if (formToShow === otpForm) {
-                        otpNewPasswordFields.style.display = (currentOtpMode === 'forgot') ? 'block' : 'none';
-                        // Focus first OTP input
-                        document.querySelector('#otpInputs input:first-child')?.focus();
-                    } else {
-                        // Clear OTP fields when switching away
-                        document.querySelectorAll('#otpInputs input').forEach(input => input.value = '');
-                    }
+        setTimeout(() => {
+            document.getElementById('introOverlay').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('loginContainer').classList.add('visible');
+                document.querySelector('#formTitle').classList.add('show');
+                document.querySelector('#formSubtitle').classList.add('show');
 
-                }, 300); // Animation delay
-            }
+                // Nếu có OtpType, tự động mở form OTP
+                if (otpType === 'register') {
+                    switchTo(otpForm, 'VERIFY EMAIL', 'Enter the code sent to your email');
+                    document.getElementById('otpForm').setAttribute('asp-page-handler', 'VerifyRegister');
+                } else if (otpType === 'forgotpassword') {
+                    switchTo(otpForm, 'RESET PASSWORD', 'Enter the code sent to your email');
+                    document.getElementById('otpForm').setAttribute('asp-page-handler', 'VerifyForgotPassword');
+                } else if (hasMessage && !otpType) {
+                    // Nếu có message và không có OTP type, giữ form login
+                    switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+                }
+            }, 500);
+        }, 1500);
 
-            showRegister.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchTo(registerForm, 'CREATE ACCOUNT', 'Join FPT Lab System');
+        // === FORM SWITCHING ===
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const forgotForm = document.getElementById('forgotForm');
+        const otpForm = document.getElementById('otpForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const showForgot = document.getElementById('showForgot');
+        const backToLogin = document.getElementById('backToLogin');
+        const otpBackToLogin = document.getElementById('otpBackToLogin');
+        const formTitle = document.getElementById('formTitle');
+        const formSubtitle = document.getElementById('formSubtitle');
+
+        function switchTo(formToShow, title, subtitle) {
+            [loginForm, registerForm, forgotForm, otpForm].forEach(f => {
+                f.classList.remove('active', 'inactive');
+                if (f === formToShow) f.classList.add('active');
+                else f.classList.add('inactive');
             });
-
-            showLogin.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
-            });
-
-            showForgot.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchTo(forgotForm, 'FORGOT PASSWORD', 'Enter your email to receive OTP');
-            });
-
-            backToLogin.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
-            });
-
-            otpBackToLogin.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
-            });
-
-            // Intro Logic (Handles TempData messages on load)
-            const generalSuccess = document.getElementById('generalSuccessMessage');
-            const tempErrors = document.querySelectorAll('.form-message-box.error');
-            let hasServerMessage = generalSuccess?.textContent?.trim() || Array.from(tempErrors).some(el => el.textContent.trim() !== '');
-
-            if (hasServerMessage) {
-                introOverlay.classList.add('hidden');
-                loginContainer.classList.add('visible');
+            formTitle.classList.remove('show');
+            formSubtitle.classList.remove('show');
+            setTimeout(() => {
+                formTitle.textContent = title;
+                formSubtitle.textContent = subtitle;
                 formTitle.classList.add('show');
                 formSubtitle.classList.add('show');
-                // Hide TempData errors from inactive forms
-                 document.querySelectorAll('.form-content.inactive .form-message-box.error').forEach(el => el.style.display = 'none');
-            } else {
-                setTimeout(() => {
-                    introOverlay.classList.add('hidden');
-                    setTimeout(() => {
-                        loginContainer.classList.add('visible');
-                        formTitle.classList.add('show');
-                        formSubtitle.classList.add('show');
-                    }, 500);
-                }, 1500); // Shorter intro for testing, change back to 3000 if needed
-            }
+            }, 300);
+        }
 
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTo(registerForm, 'CREATE ACCOUNT', 'Join FPT Lab System');
+        });
 
-            // === AJAX FORM SUBMISSION ===
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+        });
 
-            // Function to display errors from AJAX
-            function displayAjaxError(formId, message) {
-                const errorBox = document.getElementById(formId + "ErrorMessage");
-                if (errorBox) {
-                    errorBox.textContent = message || "An unknown error occurred.";
-                    errorBox.className = "form-message-box error"; // Ensure class is set
-                }
-                 // Clear individual validation spans if showing a general error
-                document.querySelectorAll(`#${formId} .field-validation-error`).forEach(span => span.textContent = '');
-            }
+        showForgot.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTo(forgotForm, 'FORGOT PASSWORD', 'Reset your password');
+        });
 
-             // Function to clear errors
-            function clearAjaxError(formId) {
-                 const errorBox = document.getElementById(formId + "ErrorMessage");
-                 if (errorBox) {
-                    errorBox.textContent = '';
-                    errorBox.className = "form-message-box"; // Reset class
-                }
-                 document.querySelectorAll(`#${formId} .field-validation-error`).forEach(span => span.textContent = '');
-            }
+        backToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+        });
 
+        otpBackToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+        });
 
-            // Get token (Assumes token exists in at least one form initially)
-            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-            const token = tokenInput ? tokenInput.value : ''; // Handle case where token might not be present initially
+        // === OTP LOGIC ===
+        const otpInputsContainer = document.getElementById('otpInputs');
+        const otpHiddenInput = document.getElementById('otpHiddenInput');
+        const otpSubmitBtn = document.getElementById('otpSubmitBtn');
 
+        if (otpInputsContainer) {
+            const inputs = [...otpInputsContainer.querySelectorAll('.otp-digit')];
 
-            // 1. Submit Login Form
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                clearAjaxError('loginForm'); // Clear previous errors
-                const formData = new FormData(loginForm);
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    input.value = input.value.replace(/[^0-9]/g, '');
 
-                try {
-                    const response = await fetch('?handler=Login', {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'RequestVerificationToken': token }
-                    });
-                     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);} // Handle HTTP errors
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        window.location.href = data.redirectUrl; // Redirect on success
-                    } else {
-                        displayAjaxError('loginForm', data.message);
+                    if (input.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
                     }
-                } catch (error) {
-                     console.error('Login Fetch Error:', error);
-                     displayAjaxError('loginForm', 'Connection error or invalid response.');
-                }
+
+                    // Cập nhật hidden input
+                    updateOtpValue();
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+
+                input.addEventListener('focus', () => {
+                    input.select();
+                });
             });
 
-            // 2. Submit Register Form
-            registerForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                clearAjaxError('registerForm');
-                const formData = new FormData(registerForm);
-
-                try {
-                     const response = await fetch('?handler=Register', {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'RequestVerificationToken': token }
-                    });
-                     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);}
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        currentOtpMode = 'register';
-                        switchTo(
-                            otpForm,
-                            'VERIFY EMAIL',
-                            'Enter the code sent to your email',
-                            `OTP đã được gửi đến: <strong>${data.email}</strong>. Vui lòng kiểm tra và nhập mã.`
-                        );
-                    } else {
-                        displayAjaxError('registerForm', data.message);
-                    }
-                } catch (error) {
-                    console.error('Register Fetch Error:', error);
-                    displayAjaxError('registerForm', 'Connection error or invalid response.');
-                }
-            });
-
-            // 3. Submit Forgot Password Form
-            forgotForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                 clearAjaxError('forgotForm');
-                const formData = new FormData(forgotForm);
-
-                 try {
-                    const response = await fetch('?handler=ForgotPassword', {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'RequestVerificationToken': token }
-                    });
-                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);}
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        currentOtpMode = 'forgot';
-                        switchTo(
-                            otpForm,
-                            'RESET PASSWORD',
-                            'Enter the code and new password',
-                            `OTP đã được gửi đến: <strong>${data.email}</strong>. Vui lòng nhập mã và mật khẩu mới.`
-                        );
-                    } else {
-                        displayAjaxError('forgotForm', data.message);
-                    }
-                 } catch (error) {
-                     console.error('Forgot Password Fetch Error:', error);
-                     displayAjaxError('forgotForm', 'Connection error or invalid response.');
-                 }
-            });
-
-            // 4. Submit OTP Form
-            otpForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                clearAjaxError('otpForm'); // Clear previous OTP errors
-                const otpValidationErrorSpan = document.getElementById('otpCombinedValidationError');
-                otpValidationErrorSpan.textContent = ''; // Clear specific OTP error
-
-                // Combine OTP digits
+            function updateOtpValue() {
                 let otpValue = '';
-                let isOtpComplete = true;
-                const otpInputs = document.querySelectorAll('#otpInputs input');
-                otpInputs.forEach(input => {
-                    if (input.value.length !== 1 || !/^\d$/.test(input.value)) {
-                        isOtpComplete = false;
-                    }
+                inputs.forEach(input => {
                     otpValue += input.value;
                 });
-
-                 if (!isOtpComplete || otpValue.length !== 6) {
-                    otpValidationErrorSpan.textContent = 'Vui lòng nhập đủ 6 chữ số OTP.';
-                    return; // Stop submission if OTP is not complete
-                }
-
-                // Set combined OTP to the correct hidden input based on mode
-                 const registerOtpInput = document.getElementById('VerifyRegisterRequest_OTP_Hidden');
-                 const forgotOtpInput = document.getElementById('VerifyForgotPasswordRequest_OTP_Hidden');
-
-                if (currentOtpMode === 'register') {
-                    if(registerOtpInput) registerOtpInput.value = otpValue;
-                     if(forgotOtpInput) forgotOtpInput.value = ''; // Clear other DTO's OTP
-                } else { // 'forgot' mode
-                     if(forgotOtpInput) forgotOtpInput.value = otpValue;
-                     if(registerOtpInput) registerOtpInput.value = ''; // Clear other DTO's OTP
-                }
-
-
-                let handlerUrl = '';
-                const formData = new FormData(otpForm); // Gets token, NewPassword, ConfirmNewPassword etc.
-
-
-                if (currentOtpMode === 'register') {
-                    handlerUrl = '?handler=VerifyRegister';
-                    // We already set the hidden input value above
-                } else { // 'forgot'
-                    handlerUrl = '?handler=VerifyForgotPassword';
-                    // We already set the hidden input value above
-                    // NewPassword and ConfirmNewPassword are already in formData via asp-for
-                }
-
-                 try {
-                    const response = await fetch(handlerUrl, {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'RequestVerificationToken': token }
-                    });
-                     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);}
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Display success message ON THE LOGIN FORM after switching back
-                        const loginErrorBox = document.getElementById("loginFormErrorMessage");
-                        if (loginErrorBox) {
-                            loginErrorBox.textContent = data.message;
-                            loginErrorBox.className = "form-message-box success";
-                        }
-                        switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
-                         otpInputs.forEach(input => input.value = ''); // Clear OTP inputs
-                         // Optionally clear new password fields if needed
-                         document.getElementById('VerifyForgotPasswordRequest_NewPassword').value = '';
-                         document.getElementById('VerifyForgotPasswordRequest_ConfirmNewPassword').value = '';
-
-                    } else {
-                        displayAjaxError('otpForm', data.message);
-                    }
-                 } catch (error) {
-                    console.error('OTP Submit Fetch Error:', error);
-                    displayAjaxError('otpForm', 'Connection error or invalid response during OTP verification.');
-                 }
-            });
-
-
-            // === OTP INPUT AUTO-FOCUS LOGIC (Giữ nguyên) ===
-            const otpInputsContainer = document.getElementById('otpInputs');
-            if (otpInputsContainer) {
-                const inputs = [...otpInputsContainer.children];
-                inputs.forEach((input, index) => {
-                    input.addEventListener('input', (e) => {
-                        input.value = input.value.replace(/[^0-9]/g, ''); // Allow only digits
-                        if (input.value.length === 1 && index < inputs.length - 1) {
-                            inputs[index + 1].focus();
-                        }
-                    });
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
-                            inputs[index - 1].focus();
-                        }
-                    });
-                    input.addEventListener('focus', () => {
-                        input.select();
-                    });
-                });
+                otpHiddenInput.value = otpValue;
             }
 
-        }); // End DOMContentLoaded
+            // Cập nhật form handler dựa trên OTP type
+            otpForm.addEventListener('submit', (e) => {
+                updateOtpValue();
+
+                if (otpType === 'register') {
+                    otpForm.action = '?handler=VerifyRegister';
+                } else if (otpType === 'forgotpassword') {
+                    otpForm.action = '?handler=VerifyForgotPassword';
+                }
+            });
+        }
     </script>
 
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
 </body>
+
 </html>
