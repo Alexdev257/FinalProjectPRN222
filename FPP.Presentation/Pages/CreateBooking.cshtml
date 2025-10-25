@@ -621,7 +621,7 @@
 
             try {
                 // Call the Page Handler using Fetch API
-                const response = await fetch(`/Booking/Create?handler=Zones&labId=${labId}`);
+                const response = await fetch(`/CreateBooking?handler=Zones&labId=${labId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
