@@ -29,18 +29,15 @@ namespace FPP.Infrastructure.Implements.Services
             _bcryptHelper = bcryptHelper;
         }
 
-        public async Task<bool> Login(LoginRequest request)
+        public async Task<User?> Login(LoginRequest request)
         {
-            var rs = false;
             var userList = await _unitOfWork.Users.GetAllAsync()
                 .Where(u => u.Email == request.Email).ToListAsync();
 
             var user = userList.FirstOrDefault();
-            if(user == null) return false;
-            if (!_bcryptHelper.VerifyPassword(request.Password, user.PasswordHash)) return false;
-            rs = true;
-            Console.WriteLine(rs);
-            return rs;
+            if(user == null) return null;
+            if (!_bcryptHelper.VerifyPassword(request.Password, user.PasswordHash)) return null;
+            return user;
             
         }
 
