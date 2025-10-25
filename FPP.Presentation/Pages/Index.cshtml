@@ -1,23 +1,1401 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Login";
+    Layout = null;
 }
 
-<h4>Login Page</h4>
-<form method="post">
-    <div asp-validation-summary="ModelOnly"></div>
-    <div class="form-group">
-        <label asp-for="request.Email" class="form-label">Email</label>
-        <input asp-for="request.Email" class="form-text" />
-        <span asp-validation-for="request.Email" class="text-danger"></span>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPT Lab Booking System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+        /* ... (Keep ALL your existing CSS here) ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+            .intro-overlay.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+        .intro-content {
+            text-align: center;
+            color: white;
+            padding: 60px;
+            animation: fadeInUp 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+            .intro-content h1 {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 6rem;
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #fff, #ff6b35, #f7931e, #fff);
+                background-size: 300% 300%;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: 900;
+                letter-spacing: 8px;
+                animation: gradientShift 4s ease infinite;
+                filter: drop-shadow(0 0 40px rgba(255, 107, 53, 0.8));
+            }
+
+            .intro-content p {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+                color: #e0e0e0;
+                font-weight: 500;
+            }
+
+            .intro-content .subtitle {
+                font-size: 1.2rem;
+                color: #999;
+                margin-bottom: 30px;
+            }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+
+            .dot:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .dot:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+        @@keyframes dotPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+
+        .login-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s;
+        }
+
+            .login-container.visible {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+        .login-wrapper {
+            position: relative;
+            perspective: 1500px;
+        }
+
+        .login-box {
+            position: relative;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(40px) saturate(180%);
+            border-radius: 30px;
+            padding: 50px 40px;
+            width: 450px;
+            border: 1px solid rgba(255, 107, 53, 0.4);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.9), 0 0 100px rgba(255, 107, 53, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: loginAppear 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+            .login-box::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #ff6b35, transparent);
+                animation: scanLine 3s linear infinite;
+                box-shadow: 0 0 20px #ff6b35;
+            }
+
+        .particle-field {
+            position: absolute;
+            inset: 0;
+            border-radius: 30px;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #ff6b35;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: particleFloat 4s ease-in-out infinite;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .holo-logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .holo-logo::before {
+                content: '';
+                position: absolute;
+                inset: -8px;
+                background: linear-gradient(135deg, #ff6b35, #f7931e, #ff6b35);
+                border-radius: 25px;
+                filter: blur(20px);
+                opacity: 0.5;
+                z-index: 1;
+                animation: pulseGlow 4s ease-in-out infinite;
+            }
+
+        @@keyframes pulseGlow {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.05);
+            }
+        }
+
+        .holo-logo-inner {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            border-radius: 18px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 0 12px rgba(255, 107, 53, 0.6)) drop-shadow(0 0 20px rgba(255, 107, 53, 0.3));
+            animation: softGlow 5s ease-in-out infinite alternate;
+        }
+
+        @@keyframes softGlow {
+            from {
+                filter: drop-shadow(0 0 12px rgba(255, 107, 53, 0.6)) drop-shadow(0 0 20px rgba(255, 107, 53, 0.3));
+            }
+
+            to {
+                filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8)) drop-shadow(0 0 25px rgba(255, 107, 53, 0.4));
+            }
+        }
+
+        .holo-logo-inner:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 0 50px rgba(255, 107, 53, 0.9), inset 0 0 30px rgba(255, 255, 255, 0.3);
+            filter: drop-shadow(0 0 25px rgba(255, 107, 53, 1));
+        }
+
+        .login-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.3rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: 2px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+            .login-title.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        .login-subtitle {
+            color: #999;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+            opacity: 0;
+            transform: translateY(-15px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+        }
+
+            .login-subtitle.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        /* Form Container */
+        .form-container {
+            position: relative;
+            /* Cập nhật chiều cao */
+            height: auto; /* Để form tự co giãn */
+            min-height: 450px;
+            perspective: 1000px;
+        }
+
+        .form-content {
+            position: absolute;
+            width: 100%;
+            backface-visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: scale(0.9) rotateY(-30deg);
+            pointer-events: none;
+        }
+
+            .form-content.active {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+                pointer-events: all;
+                z-index: 2;
+                position: relative; /* Cho phép form active xác định chiều cao */
+            }
+
+            .form-content.inactive {
+                opacity: 0;
+                transform: scale(0.9) rotateY(30deg);
+                z-index: 1;
+                position: absolute; /* Giữ form inactive ở ngoài luồng */
+            }
+
+        /* === THÊM CSS CHO THÔNG BÁO LỖI/THÀNH CÔNG === */
+        .form-message-box {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            display: none; /* Ẩn mặc định */
+            text-align: center;
+        }
+
+            .form-message-box.error {
+                background-color: rgba(255, 69, 53, 0.1);
+                border-color: rgba(255, 69, 53, 0.5);
+                color: #ff4535;
+                display: block; /* Sẽ được JS bật lên */
+            }
+
+            .form-message-box.success {
+                background-color: rgba(48, 209, 88, 0.1);
+                border-color: rgba(48, 209, 88, 0.5);
+                color: #30d158;
+                display: block; /* Sẽ được JS bật lên */
+            }
+
+        /* Hiển thị lỗi validation của từng input */
+        .field-validation-error { /* Class mặc định của asp-validation-for */
+            font-family: 'Rajdhani', sans-serif;
+            color: #ff4535;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: block;
+            margin-top: 8px;
+            padding-left: 5px;
+        }
+        /* === KẾT THÚC CSS MỚI === */
+
+
+        /* Input styles */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+            .form-group label {
+                color: #ccc;
+                display: block;
+                margin-bottom: 10px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: #ccc;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 18px 16px 55px;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'rajdhani', sans-serif;
+        }
+
+            .form-group input:focus {
+                outline: none;
+                border-color: #ff6b35;
+                background: rgba(255, 255, 255, 0.08);
+                box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1), 0 10px 40px rgba(255, 107, 53, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                transform: translateY(-3px);
+            }
+
+                .form-group input:focus + .input-icon {
+                    color: #ff6b35;
+                    transform: translateY(-50%) scale(1.2);
+                }
+
+            .form-group input::placeholder {
+                color: rgba(255, 255, 255, 0.3);
+            }
+
+        .input-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b35, #f7931e);
+            transition: width 0.4s;
+        }
+
+        .form-group input:focus ~ .input-wrapper::after {
+            width: 100%;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+            .remember-forgot a {
+                color: #ff6b35;
+                text-decoration: none;
+                transition: all 0.3s;
+                font-weight: 600;
+                position: relative;
+                cursor: pointer; /* Thêm con trỏ */
+            }
+
+                .remember-forgot a::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    width: 0;
+                    height: 2px;
+                    background: #ff6b35;
+                    transition: width 0.3s;
+                }
+
+                .remember-forgot a:hover::after {
+                    width: 100%;
+                }
+
+                .remember-forgot a:hover {
+                    color: #f7931e;
+                    text-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+                }
+
+        .login-btn {
+            width: 100%;
+            padding: 17px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 15px 40px rgba(255, 107, 53, 0.4);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+            .login-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                transition: left 0.6s;
+            }
+
+            .login-btn::after {
+                content: '→';
+                position: absolute;
+                right: 30px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.8rem;
+                transition: right 0.3s;
+            }
+
+            .login-btn:hover::before {
+                left: 100%;
+            }
+
+            .login-btn:hover::after {
+                right: 20px;
+            }
+
+            .login-btn:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 60px rgba(255, 107, 53, 0.7);
+            }
+
+            .login-btn:active {
+                transform: translateY(-2px);
+            }
+
+        .switch-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95rem;
+            color: #ccc;
+            position: relative;
+            z-index: 1;
+        }
+
+            .switch-link a {
+                color: #ff6b35;
+                text-decoration: none;
+                font-weight: 600;
+                position: relative;
+                transition: all 0.3s;
+                cursor: pointer; /* Thêm con trỏ */
+            }
+
+                .switch-link a::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    width: 0;
+                    height: 2px;
+                    background: #ff6b35;
+                    transition: width 0.3s;
+                }
+
+                .switch-link a:hover::after {
+                    width: 100%;
+                }
+
+                .switch-link a:hover {
+                    color: #f7931e;
+                    text-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
+                }
+
+        /* === NEW CSS FOR OTP FORM === */
+        .otp-instruction {
+            color: #ccc;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+            /* Style cho email trong instruction */
+            .otp-instruction strong {
+                color: #f7931e;
+                font-weight: 700;
+            }
+
+        .otp-inputs {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+            .otp-inputs input {
+                width: 50px;
+                height: 60px;
+                padding: 10px;
+                text-align: center;
+                font-size: 1.8rem;
+                font-weight: 700;
+                font-family: 'Orbitron', sans-serif;
+                border: 2px solid rgba(255, 107, 53, 0.3);
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 15px;
+                color: white;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+                .otp-inputs input::-webkit-outer-spin-button,
+                .otp-inputs input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+
+                .otp-inputs input[type=number] {
+                    -moz-appearance: textfield;
+                }
+
+                .otp-inputs input:focus {
+                    outline: none;
+                    border-color: #ff6b35;
+                    background: rgba(255, 255, 255, 0.08);
+                    transform: translateY(-3px) scale(1.05);
+                    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.3), 0 10px 40px rgba(255, 107, 53, 0.4);
+                }
+
+        /* Ẩn các trường mật khẩu mới trong form OTP mặc định */
+        .otp-new-password-fields {
+            display: none;
+        }
+
+        /* === END NEW CSS === */
+
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes loginAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotateY(20deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) rotateY(0deg);
+            }
+        }
+
+        @@keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @@keyframes scanLine {
+            0% {
+                top: 0;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+        @@keyframes particleFloat {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: translateY(-20px) translateX(10px);
+                opacity: 1;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .intro-content h1 {
+                font-size: 3.5rem;
+            }
+
+            .login-box {
+                width: 90%;
+                padding: 40px 30px;
+            }
+
+            .form-container {
+                min-height: 480px; /* Cập nhật */
+            }
+
+            .otp-inputs {
+                gap: 5px;
+            }
+
+                .otp-inputs input {
+                    width: 40px;
+                    height: 50px;
+                    font-size: 1.2rem;
+                }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-content">
+            <h1>FPT LAB Management</h1>
+            <p>Hệ thống quản lý đặt phòng thí nghiệm</p>
+            <p class="subtitle">Đại học FPT - Nơi ý tưởng được hiện thực hóa</p>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="request.Password" class="form-label">Password</label>
-        <input asp-for="request.Password" type="password" class="form-text" />
-        <span asp-validation-for="request.Password" class="text-danger"></span>
+
+    <div class="login-container" id="loginContainer">
+        <div class="login-wrapper">
+            <div class="login-box">
+                <div class="particle-field" id="particleField"></div>
+
+                <div class="login-header">
+                    <div class="holo-logo">
+                        <img class="holo-logo-inner"
+                             src="https://upload.wikimedia.org/wikipedia/vi/thumb/2/2d/Logo_Tr%C6%B0%E1%BB%9Dng_%C4%90%E1%BA%A1i_h%E1%BB%8Dc_FPT.svg/716px-Logo_Tr%C6%B0%E1%BB%9Dng_%C4%90%E1%BA%A1i_h%E1%BB%8Dc_FPT.svg.png"
+                             alt="FPT University">
+                    </div>
+                    <h2 class="login-title" id="formTitle">WELCOME BACK</h2>
+                    <p class="login-subtitle" id="formSubtitle">Access Lab Booking System</p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.GeneralSuccessMessage))
+                {
+                    <div class="form-message-box success" id="generalSuccessMessage">
+                        @Model.GeneralSuccessMessage
+                    </div>
+                }
+
+                <div class="form-container">
+
+                    <form id="loginForm" class="form-content active" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="form-message-box" id="loginFormErrorMessage"></div>
+                        @if (!string.IsNullOrEmpty(Model.LoginErrorMessage))
+                        {
+                            <div class="form-message-box error">@Model.LoginErrorMessage</div>
+                        }
+
+                        <div class="form-group">
+                            <label asp-for="LoginRequest.Email"></label>
+                            <div class="input-wrapper">
+                                <input asp-for="LoginRequest.Email" type="email" placeholder="student@fpt.edu.vn" required>
+                                <div class="input-icon"><i class="fas fa-envelope"></i></div>
+                            </div>
+                            <span asp-validation-for="LoginRequest.Email"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="LoginRequest.Password"></label>
+                            <div class="input-wrapper">
+                                <input asp-for="LoginRequest.Password" type="password" placeholder="Enter your password" required>
+                                <div class="input-icon"><i class="fas fa-lock"></i></div>
+                            </div>
+                            <span asp-validation-for="LoginRequest.Password"></span>
+                        </div>
+                        <div class="remember-forgot">
+                            <a id="showForgot">Forgot Password?</a>
+                        </div>
+                        <button type="submit" class="login-btn">Login</button>
+
+                        <div class="switch-link">
+                            Haven't account yet? <a id="showRegister">Register</a>
+                        </div>
+                    </form>
+
+                    <form id="registerForm" class="form-content" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="form-message-box" id="registerFormErrorMessage"></div>
+                        @if (!string.IsNullOrEmpty(Model.RegisterErrorMessage))
+                        {
+                            <div class="form-message-box error">@Model.RegisterErrorMessage</div>
+                        }
+
+                        <div class="form-group">
+                            <label asp-for="RegisterRequest.Name"></label>
+                            <div class="input-wrapper">
+                                <input asp-for="RegisterRequest.Name" type="text" placeholder="Adam Smith" required>
+                                <div class="input-icon"><i class="fas fa-user"></i></div>
+                            </div>
+                            <span asp-validation-for="RegisterRequest.Name"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="RegisterRequest.Email"></label>
+                            <div class="input-wrapper">
+                                <input asp-for="RegisterRequest.Email" type="email" placeholder="student@fpt.edu.vn" required>
+                                <div class="input-icon"><i class="fas fa-envelope"></i></div>
+                            </div>
+                            <span asp-validation-for="RegisterRequest.Email"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="RegisterRequest.Password"></label>
+                            <div class="input-wrapper">
+                                <input asp-for="RegisterRequest.Password" type="password" placeholder="Use strong password" required>
+                                <div class="input-icon"><i class="fas fa-lock"></i></div>
+                            </div>
+                            <span asp-validation-for="RegisterRequest.Password"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="RegisterRequest.ConfirmPassword"></label>
+                            <div class="input-wrapper">
+                                <input asp-for="RegisterRequest.ConfirmPassword" type="password" placeholder="Confirm your password" required>
+                                <div class="input-icon"><i class="fas fa-lock"></i></div>
+                            </div>
+                            <span asp-validation-for="RegisterRequest.ConfirmPassword"></span>
+                        </div>
+
+                        <button type="submit" class="login-btn">Register</button>
+
+                        <div class="switch-link">
+                            Have account already? <a id="showLogin">Login</a>
+                        </div>
+                    </form>
+
+                    <form id="forgotForm" class="form-content" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="form-message-box" id="forgotFormErrorMessage"></div>
+                        @if (!string.IsNullOrEmpty(Model.ForgotPasswordErrorMessage))
+                        {
+                            <div class="form-message-box error">@Model.ForgotPasswordErrorMessage</div>
+                        }
+
+                        <div class="form-group">
+                            <label asp-for="ForgotPasswordRequest.Email"></label>
+                            <div class="input-wrapper">
+                                <input asp-for="ForgotPasswordRequest.Email" type="email" placeholder="student@fpt.edu.vn" required>
+                                <div class="input-icon"><i class="fas fa-envelope"></i></div>
+                            </div>
+                            <span asp-validation-for="ForgotPasswordRequest.Email"></span>
+                        </div>
+                        <button type="submit" class="login-btn">Send OTP</button>
+
+                        <div class="switch-link">
+                            <a id="backToLogin">← Back to Login</a>
+                        </div>
+                    </form>
+
+                    <form id="otpForm" class="form-content" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="form-message-box" id="otpFormErrorMessage"></div>
+                        @if (!string.IsNullOrEmpty(Model.VerifyRegisterErrorMessage))
+                        {
+                            <div class="form-message-box error">@Model.VerifyRegisterErrorMessage</div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.VerifyForgotPasswordErrorMessage))
+                        {
+                            <div class="form-message-box error">@Model.VerifyForgotPasswordErrorMessage</div>
+                        }
+
+                        <p class="otp-instruction" id="otpInstruction">
+                            Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập vào bên dưới.
+                        </p>
+                        <div class="form-group">
+                            <div class="otp-inputs" id="otpInputs">
+                                <input type="text" inputmode="numeric" maxlength="1" required>
+                                <input type="text" inputmode="numeric" maxlength="1" required>
+                                <input type="text" inputmode="numeric" maxlength="1" required>
+                                <input type="text" inputmode="numeric" maxlength="1" required>
+                                <input type="text" inputmode="numeric" maxlength="1" required>
+                                <input type="text" inputmode="numeric" maxlength="1" required>
+                            </div>
+                            <input type="hidden" id="combinedOtpInput" required />
+                            <input type="hidden" asp-for="VerifyRegisterRequest.OTP" id="VerifyRegisterRequest_OTP_Hidden" />
+                            <input type="hidden" asp-for="VerifyForgotPasswordRequest.OTP" id="VerifyForgotPasswordRequest_OTP_Hidden" />
+                            <span class="field-validation-error" id="otpCombinedValidationError"></span> @* Hiển thị lỗi OTP chung *@
+                        </div>
+
+                        <div class="otp-new-password-fields" id="otpNewPasswordFields">
+                            <div class="form-group">
+                                <label asp-for="VerifyForgotPasswordRequest.NewPassword"></label>
+                                <div class="input-wrapper">
+                                    <input asp-for="VerifyForgotPasswordRequest.NewPassword" type="password" placeholder="Use strong password">
+                                    <div class="input-icon"><i class="fas fa-key"></i></div>
+                                </div>
+                                <span asp-validation-for="VerifyForgotPasswordRequest.NewPassword"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="VerifyForgotPasswordRequest.ConfirmNewPassword"></label>
+                                <div class="input-wrapper">
+                                    <input asp-for="VerifyForgotPasswordRequest.ConfirmNewPassword" type="password" placeholder="Confirm new password">
+                                    <div class="input-icon"><i class="fas fa-key"></i></div>
+                                </div>
+                                <span asp-validation-for="VerifyForgotPasswordRequest.ConfirmNewPassword"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="login-btn">Confirm</button>
+
+                        <div class="switch-link">
+                            <a id="otpBackToLogin">← Back to Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Login</button>
-    </div>
-</form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    @* KHÔNG CẦN jQuery validation nữa vì dùng AJAX *@
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script> *@
+
+    <script>
+        // === THREE.JS BACKGROUND (giữ nguyên) ===
+        // ... (Your Three.js code remains here) ...
+         const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.015);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        camera.position.z = 20;
+        const cubes = [];
+        for (let i = 0; i < 25; i++) {
+            const size = 0.8 + Math.random() * 1.2;
+            const geometry = new THREE.BoxGeometry(size, size, size);
+            const edges = new THREE.EdgesGeometry(geometry);
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
+            const wireframe = new THREE.LineSegments(edges, lineMaterial);
+            const material = new THREE.MeshStandardMaterial({
+                color: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e,
+                metalness: 0.8, roughness: 0.2, transparent: true, opacity: 0.7,
+                emissive: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e, emissiveIntensity: 0.5
+            });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.add(wireframe);
+            cube.position.set((Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60);
+            cube.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            cubes.push({
+                mesh: cube,
+                speed: 0.001 + Math.random() * 0.005,
+                axis: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
+            });
+            scene.add(cube);
+        }
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+        const colorArray = new Float32Array(particlesCount * 3);
+        for (let i = 0; i < particlesCount * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 80;
+            posArray[i + 1] = (Math.random() - 0.5) * 80;
+            posArray[i + 2] = (Math.random() - 0.5) * 80;
+            const color = Math.random() > 0.5 ? new THREE.Color(0xff6b35) : new THREE.Color(0xf7931e);
+            colorArray[i] = color.r; colorArray[i + 1] = color.g; colorArray[i + 2] = color.b;
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({ size: 0.1, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        const lights = [];
+        for (let i = 0; i < 4; i++) {
+            const light = new THREE.PointLight(i % 2 === 0 ? 0xff6b35 : 0xf7931e, 3, 150);
+            lights.push(light);
+            scene.add(light);
+        }
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            cubes.forEach((cube, index) => {
+                cube.mesh.rotateOnAxis(cube.axis, cube.speed);
+                const pulsate = Math.sin(time * 2 + index) * 0.5 + 0.5;
+                cube.mesh.material.opacity = 0.5 + pulsate * 0.3;
+                cube.mesh.material.emissiveIntensity = 0.3 + pulsate * 0.4;
+                cube.mesh.position.y += Math.sin(time * 0.5 + index) * 0.02;
+            });
+            const positions = particlesGeometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 1] += Math.sin(time + positions[i] * 0.1) * 0.015;
+            }
+            particlesGeometry.attributes.position.needsUpdate = true;
+            particlesMesh.rotation.y = time * 0.05;
+            particlesMesh.rotation.x = time * 0.02;
+            lights.forEach((light, index) => {
+                const angle = time * 0.5 + (index * Math.PI * 2 / 4);
+                const radius = 35;
+                light.position.x = Math.cos(angle) * radius;
+                light.position.z = Math.sin(angle) * radius;
+                light.position.y = Math.sin(time * 0.3 + index) * 20;
+                light.intensity = 2.5 + Math.sin(time * 2 + index) * 0.5;
+            });
+            camera.position.x = Math.sin(time * 0.1) * 3;
+            camera.position.y = Math.cos(time * 0.08) * 2;
+            camera.lookAt(0, 0, 0);
+            renderer.render(scene, camera);
+        }
+        animate();
+        const particleField = document.getElementById('particleField');
+        for (let i = 0; i < 20; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.top = Math.random() * 100 + '%';
+            p.style.animationDelay = Math.random() * 4 + 's';
+            p.style.animationDuration = (3 + Math.random() * 2) + 's';
+            particleField.appendChild(p);
+        }
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+
+        // === DOCUMENT READY ===
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // === FORM SWITCHING & INTRO LOGIC (Đã cập nhật) ===
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const forgotForm = document.getElementById('forgotForm');
+            const otpForm = document.getElementById('otpForm');
+            const showRegister = document.getElementById('showRegister');
+            const showLogin = document.getElementById('showLogin');
+            const showForgot = document.getElementById('showForgot');
+            const backToLogin = document.getElementById('backToLogin');
+            const otpBackToLogin = document.getElementById('otpBackToLogin');
+            const formTitle = document.getElementById('formTitle');
+            const formSubtitle = document.getElementById('formSubtitle');
+            const otpInstruction = document.getElementById('otpInstruction');
+            const otpNewPasswordFields = document.getElementById('otpNewPasswordFields');
+            const loginContainer = document.getElementById('loginContainer');
+            const introOverlay = document.getElementById('introOverlay');
+
+            let currentOtpMode = 'register'; // 'register' or 'forgot'
+
+            function switchTo(formToShow, title, subtitle, instruction = null) {
+                // Clear ALL error messages and validation highlights on switch
+                document.querySelectorAll('.form-message-box').forEach(box => {
+                    box.textContent = '';
+                    box.className = 'form-message-box'; // Reset class
+                });
+                document.querySelectorAll('.field-validation-error').forEach(span => {
+                    span.textContent = ''; // Clear individual validation errors
+                });
+                 document.querySelectorAll('.input-validation-error').forEach(input => {
+                    input.classList.remove('input-validation-error'); // Remove red border if any
+                });
+
+
+                [loginForm, registerForm, forgotForm, otpForm].forEach(f => {
+                    f.classList.remove('active', 'inactive');
+                    if (f === formToShow) f.classList.add('active');
+                    else f.classList.add('inactive');
+                });
+
+                formTitle.classList.remove('show');
+                formSubtitle.classList.remove('show');
+
+                setTimeout(() => {
+                    formTitle.textContent = title;
+                    formSubtitle.textContent = subtitle;
+                    formTitle.classList.add('show');
+                    formSubtitle.classList.add('show');
+
+                    if (instruction) {
+                        otpInstruction.innerHTML = instruction;
+                    }
+
+                    if (formToShow === otpForm) {
+                        otpNewPasswordFields.style.display = (currentOtpMode === 'forgot') ? 'block' : 'none';
+                        // Focus first OTP input
+                        document.querySelector('#otpInputs input:first-child')?.focus();
+                    } else {
+                        // Clear OTP fields when switching away
+                        document.querySelectorAll('#otpInputs input').forEach(input => input.value = '');
+                    }
+
+                }, 300); // Animation delay
+            }
+
+            showRegister.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTo(registerForm, 'CREATE ACCOUNT', 'Join FPT Lab System');
+            });
+
+            showLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+            });
+
+            showForgot.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTo(forgotForm, 'FORGOT PASSWORD', 'Enter your email to receive OTP');
+            });
+
+            backToLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+            });
+
+            otpBackToLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+            });
+
+            // Intro Logic (Handles TempData messages on load)
+            const generalSuccess = document.getElementById('generalSuccessMessage');
+            const tempErrors = document.querySelectorAll('.form-message-box.error');
+            let hasServerMessage = generalSuccess?.textContent?.trim() || Array.from(tempErrors).some(el => el.textContent.trim() !== '');
+
+            if (hasServerMessage) {
+                introOverlay.classList.add('hidden');
+                loginContainer.classList.add('visible');
+                formTitle.classList.add('show');
+                formSubtitle.classList.add('show');
+                // Hide TempData errors from inactive forms
+                 document.querySelectorAll('.form-content.inactive .form-message-box.error').forEach(el => el.style.display = 'none');
+            } else {
+                setTimeout(() => {
+                    introOverlay.classList.add('hidden');
+                    setTimeout(() => {
+                        loginContainer.classList.add('visible');
+                        formTitle.classList.add('show');
+                        formSubtitle.classList.add('show');
+                    }, 500);
+                }, 1500); // Shorter intro for testing, change back to 3000 if needed
+            }
+
+
+            // === AJAX FORM SUBMISSION ===
+
+            // Function to display errors from AJAX
+            function displayAjaxError(formId, message) {
+                const errorBox = document.getElementById(formId + "ErrorMessage");
+                if (errorBox) {
+                    errorBox.textContent = message || "An unknown error occurred.";
+                    errorBox.className = "form-message-box error"; // Ensure class is set
+                }
+                 // Clear individual validation spans if showing a general error
+                document.querySelectorAll(`#${formId} .field-validation-error`).forEach(span => span.textContent = '');
+            }
+
+             // Function to clear errors
+            function clearAjaxError(formId) {
+                 const errorBox = document.getElementById(formId + "ErrorMessage");
+                 if (errorBox) {
+                    errorBox.textContent = '';
+                    errorBox.className = "form-message-box"; // Reset class
+                }
+                 document.querySelectorAll(`#${formId} .field-validation-error`).forEach(span => span.textContent = '');
+            }
+
+
+            // Get token (Assumes token exists in at least one form initially)
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : ''; // Handle case where token might not be present initially
+
+
+            // 1. Submit Login Form
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearAjaxError('loginForm'); // Clear previous errors
+                const formData = new FormData(loginForm);
+
+                try {
+                    const response = await fetch('?handler=Login', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);} // Handle HTTP errors
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        window.location.href = data.redirectUrl; // Redirect on success
+                    } else {
+                        displayAjaxError('loginForm', data.message);
+                    }
+                } catch (error) {
+                     console.error('Login Fetch Error:', error);
+                     displayAjaxError('loginForm', 'Connection error or invalid response.');
+                }
+            });
+
+            // 2. Submit Register Form
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearAjaxError('registerForm');
+                const formData = new FormData(registerForm);
+
+                try {
+                     const response = await fetch('?handler=Register', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);}
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        currentOtpMode = 'register';
+                        switchTo(
+                            otpForm,
+                            'VERIFY EMAIL',
+                            'Enter the code sent to your email',
+                            `OTP đã được gửi đến: <strong>${data.email}</strong>. Vui lòng kiểm tra và nhập mã.`
+                        );
+                    } else {
+                        displayAjaxError('registerForm', data.message);
+                    }
+                } catch (error) {
+                    console.error('Register Fetch Error:', error);
+                    displayAjaxError('registerForm', 'Connection error or invalid response.');
+                }
+            });
+
+            // 3. Submit Forgot Password Form
+            forgotForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                 clearAjaxError('forgotForm');
+                const formData = new FormData(forgotForm);
+
+                 try {
+                    const response = await fetch('?handler=ForgotPassword', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);}
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        currentOtpMode = 'forgot';
+                        switchTo(
+                            otpForm,
+                            'RESET PASSWORD',
+                            'Enter the code and new password',
+                            `OTP đã được gửi đến: <strong>${data.email}</strong>. Vui lòng nhập mã và mật khẩu mới.`
+                        );
+                    } else {
+                        displayAjaxError('forgotForm', data.message);
+                    }
+                 } catch (error) {
+                     console.error('Forgot Password Fetch Error:', error);
+                     displayAjaxError('forgotForm', 'Connection error or invalid response.');
+                 }
+            });
+
+            // 4. Submit OTP Form
+            otpForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearAjaxError('otpForm'); // Clear previous OTP errors
+                const otpValidationErrorSpan = document.getElementById('otpCombinedValidationError');
+                otpValidationErrorSpan.textContent = ''; // Clear specific OTP error
+
+                // Combine OTP digits
+                let otpValue = '';
+                let isOtpComplete = true;
+                const otpInputs = document.querySelectorAll('#otpInputs input');
+                otpInputs.forEach(input => {
+                    if (input.value.length !== 1 || !/^\d$/.test(input.value)) {
+                        isOtpComplete = false;
+                    }
+                    otpValue += input.value;
+                });
+
+                 if (!isOtpComplete || otpValue.length !== 6) {
+                    otpValidationErrorSpan.textContent = 'Vui lòng nhập đủ 6 chữ số OTP.';
+                    return; // Stop submission if OTP is not complete
+                }
+
+                // Set combined OTP to the correct hidden input based on mode
+                 const registerOtpInput = document.getElementById('VerifyRegisterRequest_OTP_Hidden');
+                 const forgotOtpInput = document.getElementById('VerifyForgotPasswordRequest_OTP_Hidden');
+
+                if (currentOtpMode === 'register') {
+                    if(registerOtpInput) registerOtpInput.value = otpValue;
+                     if(forgotOtpInput) forgotOtpInput.value = ''; // Clear other DTO's OTP
+                } else { // 'forgot' mode
+                     if(forgotOtpInput) forgotOtpInput.value = otpValue;
+                     if(registerOtpInput) registerOtpInput.value = ''; // Clear other DTO's OTP
+                }
+
+
+                let handlerUrl = '';
+                const formData = new FormData(otpForm); // Gets token, NewPassword, ConfirmNewPassword etc.
+
+
+                if (currentOtpMode === 'register') {
+                    handlerUrl = '?handler=VerifyRegister';
+                    // We already set the hidden input value above
+                } else { // 'forgot'
+                    handlerUrl = '?handler=VerifyForgotPassword';
+                    // We already set the hidden input value above
+                    // NewPassword and ConfirmNewPassword are already in formData via asp-for
+                }
+
+                 try {
+                    const response = await fetch(handlerUrl, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`);}
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Display success message ON THE LOGIN FORM after switching back
+                        const loginErrorBox = document.getElementById("loginFormErrorMessage");
+                        if (loginErrorBox) {
+                            loginErrorBox.textContent = data.message;
+                            loginErrorBox.className = "form-message-box success";
+                        }
+                        switchTo(loginForm, 'WELCOME BACK', 'Access Lab Booking System');
+                         otpInputs.forEach(input => input.value = ''); // Clear OTP inputs
+                         // Optionally clear new password fields if needed
+                         document.getElementById('VerifyForgotPasswordRequest_NewPassword').value = '';
+                         document.getElementById('VerifyForgotPasswordRequest_ConfirmNewPassword').value = '';
+
+                    } else {
+                        displayAjaxError('otpForm', data.message);
+                    }
+                 } catch (error) {
+                    console.error('OTP Submit Fetch Error:', error);
+                    displayAjaxError('otpForm', 'Connection error or invalid response during OTP verification.');
+                 }
+            });
+
+
+            // === OTP INPUT AUTO-FOCUS LOGIC (Giữ nguyên) ===
+            const otpInputsContainer = document.getElementById('otpInputs');
+            if (otpInputsContainer) {
+                const inputs = [...otpInputsContainer.children];
+                inputs.forEach((input, index) => {
+                    input.addEventListener('input', (e) => {
+                        input.value = input.value.replace(/[^0-9]/g, ''); // Allow only digits
+                        if (input.value.length === 1 && index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    });
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                            inputs[index - 1].focus();
+                        }
+                    });
+                    input.addEventListener('focus', () => {
+                        input.select();
+                    });
+                });
+            }
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>

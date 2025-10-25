@@ -10,8 +10,4 @@
     <ProjectReference Include="..\FPP.Domain\FPP.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interface\IHelpers\" />
-  </ItemGroup>
-
 </Project>

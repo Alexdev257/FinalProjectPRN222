@@ -10,6 +10,7 @@ namespace FPP.Presentation
 
             builder.Services.AddDatabase(builder.Configuration);
             builder.Services.AddScopeInterface();
+            builder.Services.AddRedisConfiguration(builder.Configuration);
 
             // Add services to the container.
             builder.Services.AddRazorPages();
