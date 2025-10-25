@@ -9,11 +9,7 @@ namespace FPP.Application.DTOs.Auth
 {
     public class LoginRequest
     {
-        [Required(ErrorMessage = "Email is not empty!")]
-        [EmailAddress(ErrorMessage = "Email invalid!")]
-        public string Email { get; set; } = null!;
-        [Required(ErrorMessage = "Password is not empty!")]
-        [MinLength(8, ErrorMessage = "Password contains at least 8 characters!")]
-        public string Password { get; set; } = null!;
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }
