@@ -164,122 +164,116 @@ namespace FPP.Presentation.Pages
         //    }
         //}
 
-        [BindProperty]
-        public LoginRequest LoginRequest { get; set; } = new(); // Initialize for safety
-
-        [BindProperty]
-        public RegisterRequest RegisterRequest { get; set; } = new();
-
-        [BindProperty]
-        public VerifyRegisterRequest VerifyRegisterRequest { get; set; } = new();
-
-        [BindProperty]
-        public ForgotPasswordRequest ForgotPasswordRequest { get; set; } = new();
-
-        [BindProperty]
-        public VerifyForgotPasswordRequest VerifyForgotPasswordRequest { get; set; } = new();
+        // --- Bind Properties (Initialize to prevent null issues) ---
+        [BindProperty] public LoginRequest LoginRequest { get; set; } = new();
+        [BindProperty] public RegisterRequest RegisterRequest { get; set; } = new();
+        [BindProperty] public VerifyRegisterRequest VerifyRegisterRequest { get; set; } = new();
+        [BindProperty] public ForgotPasswordRequest ForgotPasswordRequest { get; set; } = new();
+        [BindProperty] public VerifyForgotPasswordRequest VerifyForgotPasswordRequest { get; set; } = new();
 
         // --- TempData for SUCCESS messages after redirects ---
-        [TempData]
-        public string LoginSuccessMessage { get; set; } // Only used if login leads to redirect
-        [TempData]
-        public string GeneralSuccessMessage { get; set; } // Used after OTP success -> redirect to login
+        [TempData] public string LoginSuccessMessage { get; set; }
+        [TempData] public string GeneralSuccessMessage { get; set; }
 
-        // --- TempData for ERROR messages (fallback if JS fails or page reloads) ---
-        [TempData]
-        public string RegisterErrorMessage { get; set; }
-        [TempData]
-        public string LoginErrorMessage { get; set; }
-        [TempData]
-        public string ForgotPasswordErrorMessage { get; set; }
-        [TempData]
-        public string VerifyRegisterErrorMessage { get; set; }
-        [TempData]
-        public string VerifyForgotPasswordErrorMessage { get; set; }
+        // --- TempData for ERROR messages (fallback) ---
+        [TempData] public string RegisterErrorMessage { get; set; }
+        [TempData] public string LoginErrorMessage { get; set; }
+        [TempData] public string ForgotPasswordErrorMessage { get; set; }
+        [TempData] public string VerifyRegisterErrorMessage { get; set; }
+        [TempData] public string VerifyForgotPasswordErrorMessage { get; set; }
 
-        public void OnGet()
+        public void OnGet() { }
+
+        // --- Helper to extract errors for a specific model ---
+        private string GetModelErrors(string modelPrefix)
         {
+            return string.Join(" ", ModelState
+                .Where(kvp => kvp.Key.StartsWith(modelPrefix + ".") || kvp.Key == modelPrefix) // Filter keys by prefix
+                .SelectMany(kvp => kvp.Value.Errors)
+                .Select(e => e.ErrorMessage));
         }
+
 
         // --- AJAX Handlers ---
 
         public async Task<IActionResult> OnPostLoginAsync()
         {
-            if (!ModelState.IsValid)
+            // Explicitly validate ONLY LoginRequest
+            if (!TryValidateModel(LoginRequest, nameof(LoginRequest)))
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return new JsonResult(new { success = false, message = string.Join(" ", errors) });
+                return new JsonResult(new { success = false, message = GetModelErrors(nameof(LoginRequest)) });
             }
             try
             {
+                // *** IMPORTANT: Ensure your AuthService.Login uses password verification (like BcryptHelper.Verify), NOT direct comparison ***
                 var rs = await _authService.Login(LoginRequest);
                 if (rs)
                 {
                     // TODO: Implement actual sign-in logic (e.g., HttpContext.SignInAsync)
-                    LoginSuccessMessage = "??ng nh?p thành công!"; // Set TempData for next page
-                    return new JsonResult(new { success = true, redirectUrl = Url.Page("/Home") });
+                    LoginSuccessMessage = "??ng nh?p thành công!";
+                    return new JsonResult(new { success = true, redirectUrl = Url.Page("/Home") }); // Redirect URL for JS
                 }
                 else
                 {
                     return new JsonResult(new { success = false, message = "Email ho?c m?t kh?u không chính xác." });
                 }
             }
-            catch (Exception ex) // Catch specific exceptions if possible
+            catch (Exception ex)
             {
-                // Log the exception ex
-                return new JsonResult(new { success = false, message = "?ã x?y ra l?i h? th?ng. Vui lòng th? l?i sau." });
+                // TODO: Log the exception ex
+                return new JsonResult(new { success = false, message = "?ã x?y ra l?i h? th?ng khi ??ng nh?p." });
             }
         }
 
         public async Task<IActionResult> OnPostRegisterAsync()
         {
-            if (!ModelState.IsValid)
+            // Explicitly validate ONLY RegisterRequest
+            if (!TryValidateModel(RegisterRequest, nameof(RegisterRequest)))
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return new JsonResult(new { success = false, message = string.Join(" ", errors) });
+                return new JsonResult(new { success = false, message = GetModelErrors(nameof(RegisterRequest)) });
             }
             try
             {
                 var rs = await _authService.Register(RegisterRequest);
                 if (rs)
                 {
-                    // Return success and the email used, so JS can display it
                     return new JsonResult(new { success = true, email = RegisterRequest.Email });
                 }
                 else
                 {
-                    // Assuming service returns false if email exists or email failed
                     return new JsonResult(new { success = false, message = "Email này ?ã t?n t?i ho?c không th? g?i email xác th?c." });
                 }
             }
             catch (Exception ex)
             {
-                // Log the exception ex
-                return new JsonResult(new { success = false, message = "?ã x?y ra l?i h? th?ng khi ??ng ký. Vui lòng th? l?i." });
+                // TODO: Log the exception ex
+                return new JsonResult(new { success = false, message = "?ã x?y ra l?i h? th?ng khi ??ng ký." });
             }
         }
 
-        // Renamed handler to match the form submission logic
         public async Task<IActionResult> OnPostVerifyRegisterAsync()
         {
-            // Make sure the OTP from the hidden field is correctly bound
-            if (string.IsNullOrEmpty(VerifyRegisterRequest.OTP) || VerifyRegisterRequest.OTP.Length != 6 || !VerifyRegisterRequest.OTP.All(char.IsDigit))
+            // Manually set OTP from hidden input before validation if needed,
+            // or ensure the hidden input binding works correctly.
+            // We will rely on JS putting value into the hidden asp-for input.
+
+            // Explicitly validate ONLY VerifyRegisterRequest
+            if (!TryValidateModel(VerifyRegisterRequest, nameof(VerifyRegisterRequest)))
             {
-                ModelState.AddModelError("VerifyRegisterRequest.OTP", "OTP ph?i có 6 ch? s?.");
+                // Also manually check combined OTP input if necessary
+                if (string.IsNullOrEmpty(VerifyRegisterRequest.OTP) || VerifyRegisterRequest.OTP.Length != 6 || !VerifyRegisterRequest.OTP.All(char.IsDigit))
+                {
+                    return new JsonResult(new { success = false, message = "OTP ph?i có 6 ch? s?." });
+                }
+                return new JsonResult(new { success = false, message = GetModelErrors(nameof(VerifyRegisterRequest)) });
             }
 
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return new JsonResult(new { success = false, message = string.Join(" ", errors) });
-            }
             try
             {
-                // Ensure AuthService.VerifyRegister uses the DTO correctly
                 var rs = await _authService.VerifyRegsiter(VerifyRegisterRequest);
                 if (rs)
                 {
-                    GeneralSuccessMessage = "Xác th?c tài kho?n thành công! Vui lòng ??ng nh?p."; // Set TempData for next page (login)
+                    GeneralSuccessMessage = "Xác th?c tài kho?n thành công! Vui lòng ??ng nh?p.";
                     return new JsonResult(new { success = true, message = "Xác th?c thành công! Vui lòng ??ng nh?p." });
                 }
                 else
@@ -289,32 +283,26 @@ namespace FPP.Presentation.Pages
             }
             catch (Exception ex)
             {
-                // Log the exception ex
-                return new JsonResult(new { success = false, message = "?ã x?y ra l?i khi xác th?c OTP. Vui lòng th? l?i." });
+                // TODO: Log the exception ex
+                return new JsonResult(new { success = false, message = "?ã x?y ra l?i khi xác th?c OTP." });
             }
         }
 
         public async Task<IActionResult> OnPostForgotPasswordAsync()
         {
-            // Only validate the email field for this specific request DTO
-            if (!ModelState.IsValid)
+            // Explicitly validate ONLY ForgotPasswordRequest
+            if (!TryValidateModel(ForgotPasswordRequest, nameof(ForgotPasswordRequest)))
             {
-                var errors = ModelState.Values.Where(v => v.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
-                                        .SelectMany(v => v.Errors)
-                                        .Select(e => e.ErrorMessage)
-                                        .ToList();
-                // Check specifically if the error is for the Email field in this DTO
-                if (ModelState.ContainsKey("ForgotPasswordRequest.Email") && ModelState["ForgotPasswordRequest.Email"].Errors.Any())
-                {
-                    return new JsonResult(new { success = false, message = string.Join(" ", errors) });
-                }
-                // If other model errors exist (shouldn't happen here), treat as success to avoid confusion, or handle differently.
-                // For now, let's assume only email validation matters here. Proceed if email is valid.
-            }
+                // Your ForgotPasswordRequest DTO only has Email, so this check is simpler.
+                // If other properties were present, you'd filter errors like GetModelErrors.
+                var emailError = ModelState[nameof(ForgotPasswordRequest) + ".Email"]?.Errors.FirstOrDefault()?.ErrorMessage;
+                return new JsonResult(new { success = false, message = emailError ?? "Email không h?p l?." });
 
+            }
             try
             {
-                // Ensure AuthService.ForgotPassword uses the correct DTO (only Email)
+                // Pass only the necessary data (Email) if your service expects that.
+                // Assuming your service was updated to accept the simplified DTO:
                 var rs = await _authService.ForgotPassword(ForgotPasswordRequest);
                 if (rs)
                 {
@@ -327,43 +315,49 @@ namespace FPP.Presentation.Pages
             }
             catch (Exception ex)
             {
-                // Log the exception ex
-                return new JsonResult(new { success = false, message = "?ã x?y ra l?i h? th?ng. Vui lòng th? l?i." });
+                // TODO: Log the exception ex
+                return new JsonResult(new { success = false, message = "?ã x?y ra l?i h? th?ng khi g?i yêu c?u." });
             }
         }
 
         public async Task<IActionResult> OnPostVerifyForgotPasswordAsync()
         {
-            // Make sure the OTP from the hidden field is correctly bound
-            if (string.IsNullOrEmpty(VerifyForgotPasswordRequest.OTP) || VerifyForgotPasswordRequest.OTP.Length != 6 || !VerifyForgotPasswordRequest.OTP.All(char.IsDigit))
+            // Manually set OTP from hidden input before validation if needed.
+            // We will rely on JS putting value into the hidden asp-for input.
+
+            // Explicitly validate ONLY VerifyForgotPasswordRequest
+            if (!TryValidateModel(VerifyForgotPasswordRequest, nameof(VerifyForgotPasswordRequest)))
             {
-                ModelState.AddModelError("VerifyForgotPasswordRequest.OTP", "OTP ph?i có 6 ch? s?.");
+                // Also manually check combined OTP input if necessary
+                if (string.IsNullOrEmpty(VerifyForgotPasswordRequest.OTP) || VerifyForgotPasswordRequest.OTP.Length != 6 || !VerifyForgotPasswordRequest.OTP.All(char.IsDigit))
+                {
+                    // Add model error specifically for OTP if it wasn't caught by TryValidateModel
+                    if (!ModelState.ContainsKey(nameof(VerifyForgotPasswordRequest) + ".OTP"))
+                    {
+                        ModelState.AddModelError(nameof(VerifyForgotPasswordRequest) + ".OTP", "OTP ph?i có 6 ch? s?.");
+                    }
+                }
+                return new JsonResult(new { success = false, message = GetModelErrors(nameof(VerifyForgotPasswordRequest)) });
             }
 
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return new JsonResult(new { success = false, message = string.Join(" ", errors) });
-            }
             try
             {
-                // Ensure AuthService.VerifyForgotPassword uses the DTO correctly (OTP + NewPassword)
+                // Pass the DTO containing OTP and NewPassword
                 var rs = await _authService.VerifyForgotPassword(VerifyForgotPasswordRequest);
                 if (rs)
                 {
-                    GeneralSuccessMessage = "??t l?i m?t kh?u thành công! Vui lòng ??ng nh?p."; // Set TempData for next page (login)
+                    GeneralSuccessMessage = "??t l?i m?t kh?u thành công! Vui lòng ??ng nh?p.";
                     return new JsonResult(new { success = true, message = "??t l?i m?t kh?u thành công! Vui lòng ??ng nh?p." });
                 }
                 else
                 {
-                    // Service might return false for invalid OTP or DB update failure
                     return new JsonResult(new { success = false, message = "Mã OTP không h?p l?, ?ã h?t h?n ho?c có l?i x?y ra." });
                 }
             }
             catch (Exception ex)
             {
-                // Log the exception ex
-                return new JsonResult(new { success = false, message = "?ã x?y ra l?i khi ??t l?i m?t kh?u. Vui lòng th? l?i." });
+                // TODO: Log the exception ex
+                return new JsonResult(new { success = false, message = "?ã x?y ra l?i khi ??t l?i m?t kh?u." });
             }
         }
     }

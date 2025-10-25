@@ -1,4 +1,6 @@
 using FPP.Infrastructure.DependencyInjection;
+using FPP.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace FPP.Presentation
 {
@@ -16,6 +18,26 @@ namespace FPP.Presentation
             builder.Services.AddRazorPages();
 
             var app = builder.Build();
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var conn = db.Database.GetConnectionString();
+                Console.WriteLine($"?? Connection string: {conn}");
+
+                var pending = db.Database.GetPendingMigrations().ToList();
+                Console.WriteLine($"?? Pending migrations: {pending.Count}");
+
+                if (pending.Any())
+                {
+                    Console.WriteLine("?? Running database migrations...");
+                    db.Database.Migrate();
+                    Console.WriteLine("? Migration completed.");
+                }
+                else
+                {
+                    Console.WriteLine("? No pending migrations.");
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
