@@ -1,6 +1,7 @@
 ﻿using FPP.Application.DTOs.Lab;
 using FPP.Application.Interface.IRepositories;
 using FPP.Application.Interface.IServices;
+using FPP.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -64,6 +65,24 @@ namespace FPP.Infrastructure.Implements.Services
             }).ToList();
 
             return labsViewModel;
+        }
+
+        public async Task<List<LabZone>> GetZonesByLabIdAsync(int labId)
+        {
+            return await _unitOfWork.LabZones.GetAllAsync()
+                        .Where(z => z.LabId == labId)
+                        .OrderBy(z => z.Name)
+                        .ToListAsync();
+        }
+
+        public async Task<List<Lab>> GetAllLabsAsync()
+        {
+            // GetAllAsync() trả về IQueryable, cho phép thêm LINQ
+            var query = _unitOfWork.Labs.GetAllAsync()
+                                  .OrderBy(l => l.Name); // Sắp xếp theo tên Lab (tùy chọn)
+
+            // Thực thi query và chuyển thành List bất đồng bộ
+            return await query.ToListAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FPP.Application.DTOs.Lab;
+using FPP.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,8 @@ namespace FPP.Application.Interface.IServices
         Task<List<LabVM>> GetAllLabsWithAvailabilityAsync();
         int GetTotalLabCountAsync();
         Task<int> GetAvailableLabCountAsync();
+        Task<List<LabZone>> GetZonesByLabIdAsync(int labId);
+        Task<List<Lab>> GetAllLabsAsync();
+
     }
 }
