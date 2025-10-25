@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FPP.Application.DTOs
+namespace FPP.Application.Interface.IHelpers
 {
-    public class LoginResponse
+    public interface IOtpHelper
     {
+        string GenerateOtpAsync(int length);
     }
 }
