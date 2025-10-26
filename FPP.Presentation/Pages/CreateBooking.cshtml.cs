@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -23,6 +24,7 @@ namespace FPP.Presentation.Pages.Booking
         private readonly IActivityTypeService _activityTypeService;
         private readonly IUserService _userService;
         private readonly ILabEventService _labEventService; 
+        private readonly INotificationService _notificationService;
         private readonly IHubContext<NotificationBookingHub> _hubContext;
 
         public CreateBookingModel(
@@ -30,12 +32,14 @@ namespace FPP.Presentation.Pages.Booking
             IActivityTypeService activityTypeService,
             IUserService userService,
             ILabEventService labEventService,
+            INotificationService notificationService,
             IHubContext<NotificationBookingHub> hubContext) 
         {
             _labService = labService;
             _activityTypeService = activityTypeService;
             _userService = userService;
             _labEventService = labEventService;
+            _notificationService = notificationService;
             _hubContext = hubContext;
         }
 
@@ -64,6 +68,8 @@ namespace FPP.Presentation.Pages.Booking
             ActivityTypeOptions = new SelectList(activityTypes, nameof(ActivityType.ActivityTypeId), nameof(ActivityType.Name));
 
             Input.BookingDate = DateTime.Today;
+            //Input.StartTime = DateTime.UtcNow.AddHours(7).TimeOfDay;
+            //Input.EndTime = DateTime.UtcNow.AddHours(8).TimeOfDay;
 
             if (labId.HasValue)
             {
@@ -135,11 +141,11 @@ namespace FPP.Presentation.Pages.Booking
             }
 
             // --- Create Booking using Service ---
-            var (success, errorMessage) = await _labEventService.CreateBookingAsync(Input, userId);
+            var (success, errorMessage, eventId) = await _labEventService.CreateBookingAsync(Input, userId);
 
-            if (success)
+            if (success && eventId.HasValue)
             {
-                await SendBookingNotificationManager();
+                await SendBookingNotificationManager(eventId.Value);
 
                 TempData["StatusMessage"] = "Booking request submitted successfully! It is pending approval.";
                 return RedirectToPage("/MyBookings");
@@ -154,7 +160,6 @@ namespace FPP.Presentation.Pages.Booking
             }
         }
 
-        // Helper method to reload dropdowns
         private async Task ReloadDropdownsAsync()
         {
             var labs = await _labService.GetAllLabsAsync();
@@ -168,7 +173,7 @@ namespace FPP.Presentation.Pages.Booking
             }
         }
 
-        private async Task SendBookingNotificationManager()
+        private async Task SendBookingNotificationManager(int bookingEventId)
         {
             try
             {
@@ -182,11 +187,13 @@ namespace FPP.Presentation.Pages.Booking
                 var lab = await _labService.GetLabByIdAsync(Input.LabId);
                 var zone = await _labService.GetZoneByIdAsync(Input.ZoneId);
 
+                var notificationText = $"{CurrentUser?.Name} has requested to book {lab?.Name} - {zone?.Name} on {Input.BookingDate:dd/MM/yyyy} from {Input.StartTime:hh\\:mm} to {Input.EndTime:hh\\:mm}";
+
                 var notificationMessage = new
                 {
                     type = "NewBooking",
                     title = "New Booking Request",
-                    message = $"{CurrentUser?.Name} has requested to book {lab?.Name} - {zone?.Name}",
+                    message = notificationText,
                     bookingDetails = new
                     {
                         userId = CurrentUser?.UserId,
@@ -208,6 +215,12 @@ namespace FPP.Presentation.Pages.Booking
                 int sentCount = 0;
                 foreach(var manager in managers)
                 {
+                    await _notificationService.CreateNotificationAsync(
+                        manager.UserId,
+                        bookingEventId,
+                        notificationText
+                    );
+
                     var connectionId = NotificationBookingHub.GetConnectionId(manager.UserId.ToString());
                     if (!string.IsNullOrEmpty(connectionId))
                     {
