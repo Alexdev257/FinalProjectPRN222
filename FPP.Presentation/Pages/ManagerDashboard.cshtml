@@ -88,6 +88,170 @@
             font-weight: 700;
         }
 
+            .notification-badge.show {
+                display: flex;
+            }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 420px;
+            max-height: 600px;
+            background: rgba(10, 10, 10, 0.98);
+            border: 1px solid rgba(255, 107, 53, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+            .notification-panel.show {
+                display: flex;
+            }
+
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-panel-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .notification-panel-header h3 {
+                color: #ff6b35;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.2rem;
+            }
+
+        .close-panel {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+            .close-panel:hover {
+                color: #ff6b35;
+                transform: rotate(90deg);
+            }
+
+        .notification-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+            .notification-list::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .notification-list::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .notification-list::-webkit-scrollbar-thumb {
+                background: rgba(255, 107, 53, 0.5);
+                border-radius: 4px;
+            }
+
+        .notification-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+            .notification-item:hover {
+                background: rgba(255, 107, 53, 0.1);
+                border-color: rgba(255, 107, 53, 0.3);
+            }
+
+            .notification-item.unread {
+                background: rgba(255, 107, 53, 0.05);
+                border-left: 3px solid #ff6b35;
+            }
+
+        .notification-unread-dot {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+
+        .notification-content {
+            padding-right: 20px;
+        }
+
+        .notification-message {
+            color: white;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .notification-details {
+            color: #999;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .notification-time {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .notification-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+            .notification-empty i {
+                font-size: 3rem;
+                margin-bottom: 15px;
+                opacity: 0.3;
+            }
+
         .user-info {
             display: flex;
             align-items: center;
@@ -505,16 +669,6 @@
             }
         }
 
-        @@keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-        }
-
         .loading {
             animation: pulse 1.5s ease-in-out infinite;
         }
@@ -540,6 +694,11 @@
             .navbar {
                 padding: 15px 20px;
             }
+
+            .notification-panel {
+                width: calc(100vw - 40px);
+                right: 20px;
+            }
         }
     </style>
 </head>
@@ -561,8 +720,31 @@
                     <div style="font-size: 0.85rem; color: #999;">Manager</div>
                 </div>
             </div>
+
+            <div class="user-info">
+                <form method="post" asp-page-handler="Logout" style="margin-left: auto;">
+                    <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
+                </form>
+            </div>
         </div>
     </nav>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-panel-header">
+            <h3><i class="fas fa-bell"></i> Notifications</h3>
+            <button class="close-panel" onclick="toggleNotificationPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <div class="notification-empty">
+                <i class="fas fa-bell-slash"></i>
+                <h4>No notifications</h4>
+                <p>You're all caught up!</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Container -->
     <div class="container">
@@ -726,64 +908,191 @@
             .withAutomaticReconnect()
             .build();
 
-
-
         connection.on("ReceiveNotification", function (notification) {
             console.log("Received notification:", notification);
             showToastNotification(notification);
             playNotificationSound();
-            updateNotificationBadge();
+            loadNotifications(); // Reload notifications
             setTimeout(() => {
                 refreshBookings();
             }, 5500);
-            
         });
 
-            function playNotificationSound() {
-                try {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
 
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
 
-                    oscillator.frequency.value =1000;
-                    oscillator.type = 'sine';
+                oscillator.frequency.value = 1000;
+                oscillator.type = 'sine';
 
-                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
 
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.3);
-                } catch (e) {
-                    console.log('Could not play sound:', e);
-                }
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log('Could not play sound:', e);
             }
-
+        }
 
         connection.start()
             .then(function () {
                 console.log("SignalR Connected!");
+                loadNotifications(); // Load notifications on connect
             })
             .catch(function (err) {
                 console.error("SignalR Connection Error: ", err);
-                // Retry connection after 5 seconds
                 setTimeout(() => connection.start(), 5000);
             });
 
+        // Load notifications from database
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/ManagerDashboard?handler=Notifications');
+                const data = await response.json();
+
+                if (data.success) {
+                    displayNotifications(data.notifications);
+                    updateBadgeCount(data.notifications);
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        // Display notifications in panel
+        function displayNotifications(notifications) {
+            const listElement = document.getElementById('notificationList');
+
+            if (!notifications || notifications.length === 0) {
+                listElement.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="fas fa-bell-slash"></i>
+                        <h4>No notifications</h4>
+                        <p>You're all caught up!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listElement.innerHTML = notifications.map(notif => {
+                const timeAgo = getTimeAgo(new Date(notif.sentAt));
+                const unreadClass = !notif.isRead ? 'unread' : '';
+                const unreadDot = !notif.isRead ? '<span class="notification-unread-dot"></span>' : '';
+
+                return `
+                    <div class="notification-item ${unreadClass}"
+                         data-notification-id="${notif.notificationId}"
+                         data-is-read="${notif.isRead}"
+                         onclick="handleNotificationClick(${notif.notificationId}, ${notif.isRead})">
+                        ${unreadDot}
+                        <div class="notification-content">
+                            <div class="notification-message">${notif.message}</div>
+                            <div class="notification-details">
+                                👤 ${notif.eventDetails.organizer || 'Unknown'}<br>
+                                🏢 ${notif.eventDetails.lab || ''} - ${notif.eventDetails.zone || ''}<br>
+                                📅 ${new Date(notif.eventDetails.startTime).toLocaleDateString('en-GB')}<br>
+                                ⏰ ${new Date(notif.eventDetails.startTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})} -
+                                    ${new Date(notif.eventDetails.endTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})}
+                            </div>
+                            <span class="notification-time">${timeAgo}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update badge count
+        function updateBadgeCount(notifications) {
+            const unreadCount = notifications.filter(n => !n.isRead).length;
+            const badge = document.getElementById('notificationBadge');
+
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+
+        // Handle notification click
+        async function handleNotificationClick(notificationId, isRead) {
+            if (!isRead) {
+                try {
+                    const response = await fetch(`/ManagerDashboard?handler=MarkAsRead&notificationId=${notificationId}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Update UI
+                        const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                        if (notifElement) {
+                            notifElement.classList.remove('unread');
+                            const dot = notifElement.querySelector('.notification-unread-dot');
+                            if (dot) dot.remove();
+                            notifElement.setAttribute('data-is-read', 'true');
+                        }
+
+                        // Reload to update badge
+                        loadNotifications();
+                    }
+                } catch (error) {
+                    console.error('Error marking as read:', error);
+                }
+            }
+        }
+
+        // Toggle notification panel
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notificationPanel');
+            panel.classList.toggle('show');
+
+            if (panel.classList.contains('show')) {
+                loadNotifications();
+            }
+        }
+
+        // Close panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('notificationPanel');
+            const icon = document.querySelector('.notification-icon');
+
+            if (panel.classList.contains('show') &&
+                !panel.contains(event.target) &&
+                !icon.contains(event.target)) {
+                panel.classList.remove('show');
+            }
+        });
+
+        // Get time ago string
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
+
+            return date.toLocaleDateString('en-GB');
+        }
 
         function showToastNotification(notification) {
             try {
                 const toast = document.createElement('div');
                 toast.className = 'notification-toast';
 
-                // Safely access nested properties
                 const title = notification.title || "New Notification";
                 const message = notification.message || "";
                 const timestamp = notification.timestamp || new Date();
 
-                // Safely access BookingDetails
                 const details = notification.bookingDetails || {};
                 const lab = details.lab || "Unknown Lab";
                 const zone = details.zone || "Unknown Zone";
@@ -813,7 +1122,6 @@
 
                 document.body.appendChild(toast);
 
-                // Auto remove after 5 seconds
                 setTimeout(() => {
                     toast.style.animation = 'slideOut 0.5s ease-out';
                     setTimeout(() => toast.remove(), 500);
@@ -822,15 +1130,6 @@
                 console.log("Toast displayed successfully");
             } catch (error) {
                 console.error("Error showing toast:", error);
-            }
-        }
-
-        function updateNotificationBadge() {
-            const badge = document.querySelector('.notification-badge');
-            if (badge) {
-                const count = parseInt(badge.textContent || '0');
-                badge.textContent = count + 1;
-                badge.style.display = 'flex';
             }
         }
 
@@ -894,10 +1193,8 @@
         }
 
         function viewBookingDetails(eventId) {
-            // Implement view details modal
             const modal = document.getElementById('bookingModal');
             modal.style.display = 'flex';
-            // Load booking details via AJAX
         }
 
         function closeModal() {
@@ -913,8 +1210,12 @@
                 connection.start();
             }
         });
+
+        // Load notifications on page load
+        window.addEventListener('load', function() {
+            loadNotifications();
+        });
     </script>
     @Html.AntiForgeryToken()
 </body>
 </html>
-

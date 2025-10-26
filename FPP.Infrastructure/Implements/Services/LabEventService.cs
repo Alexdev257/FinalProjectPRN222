@@ -72,7 +72,7 @@ namespace FPP.Infrastructure.Implements.Services
                               && e.EndTime > startTime); // Existing ends after new starts
         }
 
-        public async Task<(bool Success, string ErrorMessage)> CreateBookingAsync(BookingInputModel bookingInput, int organizerUserId)
+        public async Task<(bool Success, string ErrorMessage, int? eventId)> CreateBookingAsync(BookingInputModel bookingInput, int organizerUserId)
         {
             DateTime startDateTime;
             DateTime endDateTime;
@@ -84,7 +84,7 @@ namespace FPP.Infrastructure.Implements.Services
             catch (ArgumentOutOfRangeException ex)
             {
                 _logger.LogError(ex, "Error combining date and time during booking creation.");
-                return (false, "Invalid date/time combination.");
+                return (false, "Invalid date/time combination.", null);
             }
 
 
@@ -92,7 +92,7 @@ namespace FPP.Infrastructure.Implements.Services
             bool hasConflict = await CheckTimeConflictAsync(bookingInput.LabId, bookingInput.ZoneId, startDateTime, endDateTime);
             if (hasConflict)
             {
-                return (false, "The selected time slot became unavailable. Please choose another time.");
+                return (false, "The selected time slot became unavailable. Please choose another time.", null);
             }
 
             var newEvent = new LabEvent
@@ -131,19 +131,19 @@ namespace FPP.Infrastructure.Implements.Services
                 bool saved = await _unitOfWork.CompleteAsync();
                 if (saved)
                 {
-                    return (true, string.Empty); // Success
+                    return (true, string.Empty, newEvent.EventId); // Success
                 }
                 else
                 {
                     _logger.LogWarning("CompleteAsync returned false when creating booking for User {UserId}", organizerUserId);
-                    return (false, "Failed to save booking request to the database.");
+                    return (false, "Failed to save booking request to the database.", null);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while saving booking for User {UserId}", organizerUserId);
                 // Consider more specific error handling/logging if needed
-                return (false, "An unexpected error occurred while saving the booking.");
+                return (false, "An unexpected error occurred while saving the booking.", null);
             }
         }
 
