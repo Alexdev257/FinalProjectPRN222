@@ -1,10 +1,15 @@
 using FPP.Application.DTOs;
 using FPP.Application.Interface.IServices;
 using FPP.Domain.Entities;
+using FPP.Presentation.Hubs;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -17,18 +22,21 @@ namespace FPP.Presentation.Pages.Booking
         private readonly ILabService _labService;
         private readonly IActivityTypeService _activityTypeService;
         private readonly IUserService _userService;
-        private readonly ILabEventService _labEventService; // Added
+        private readonly ILabEventService _labEventService; 
+        private readonly IHubContext<NotificationBookingHub> _hubContext;
 
         public CreateBookingModel(
             ILabService labService,
             IActivityTypeService activityTypeService,
             IUserService userService,
-            ILabEventService labEventService) // Added
+            ILabEventService labEventService,
+            IHubContext<NotificationBookingHub> hubContext) 
         {
             _labService = labService;
             _activityTypeService = activityTypeService;
             _userService = userService;
-            _labEventService = labEventService; // Added
+            _labEventService = labEventService;
+            _hubContext = hubContext;
         }
 
         [BindProperty]
@@ -131,6 +139,8 @@ namespace FPP.Presentation.Pages.Booking
 
             if (success)
             {
+                await SendBookingNotificationManager();
+
                 TempData["StatusMessage"] = "Booking request submitted successfully! It is pending approval.";
                 return RedirectToPage("/MyBookings");
             }
@@ -156,6 +166,70 @@ namespace FPP.Presentation.Pages.Booking
             {
                 // You might want to store zones in a separate property or handle this in JS on error
             }
+        }
+
+        private async Task SendBookingNotificationManager()
+        {
+            try
+            {
+                var managers = await _userService.GetUsersByRoleAsync(2);
+                if (!managers.Any())
+                {
+                    Console.WriteLine("No managers found");
+                    return;
+                }
+
+                var lab = await _labService.GetLabByIdAsync(Input.LabId);
+                var zone = await _labService.GetZoneByIdAsync(Input.ZoneId);
+
+                var notificationMessage = new
+                {
+                    Type = "NewBooking",
+                    Title = "New Booking Request",
+                    Message = $"{CurrentUser?.Name} has requested to book {lab?.Name} - {zone?.Name}",
+                    BookingDetails = new
+                    {
+                        UserId = CurrentUser?.UserId,
+                        UserName = CurrentUser?.Name,
+                        UserEmail = CurrentUser?.Email,
+                        LabId = Input.LabId,
+                        Lab = lab?.Name,
+                        ZoneId = Input.ZoneId,
+                        Zone = zone?.Name,
+                        Date = Input.BookingDate.ToString("dd/MM/yyyy"),
+                        StartTime = Input.StartTime.ToString(@"hh\:mm"),
+                        EndTime = Input.EndTime.ToString(@"hh\:mm"),
+                        Activity = Input.Title,
+                        Description = Input.Description
+                    },
+                    Timestamp = DateTime.Now
+                };
+
+                int sentCount = 0;
+                foreach(var manager in managers)
+                {
+                    var connectionId = NotificationBookingHub.GetConnectionId(manager.UserId.ToString());
+                    if (!string.IsNullOrEmpty(connectionId))
+                    {
+                        await _hubContext.Clients.Client(connectionId)
+                            .SendAsync("ReceiveNotification", notificationMessage);
+                        sentCount++;
+                    }
+                }
+
+                Console.WriteLine($"Notification sent to {sentCount}/{managers.Count} role 2 users");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending notification: {ex.Message}");
+            }
+        }
+
+        public async Task<IActionResult> OnPostLogoutAsync()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToPage("/Login");
         }
     }
 }

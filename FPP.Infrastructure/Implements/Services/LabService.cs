@@ -84,5 +84,15 @@ namespace FPP.Infrastructure.Implements.Services
             // Thực thi query và chuyển thành List bất đồng bộ
             return await query.ToListAsync();
         }
+
+        public async Task<Lab?> GetLabByIdAsync(int labId)
+        {
+            return await _unitOfWork.Labs.GetByIdAsync(labId);
+        }
+
+        public async Task<LabZone?> GetZoneByIdAsync(int zoneId)
+        {
+            return await _unitOfWork.LabZones.GetByIdAsync(zoneId);
+        }
     }
 }

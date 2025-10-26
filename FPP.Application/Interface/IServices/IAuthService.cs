@@ -15,5 +15,6 @@ namespace FPP.Application.Interface.IServices
         Task<bool> VerifyRegsiter(VerifyRegisterRequest request);
         Task<bool> ForgotPassword(ForgotPasswordRequest request);
         Task<bool> VerifyForgotPassword(VerifyForgotPasswordRequest request);
+        Task<bool> CreateManagerAccount(User user);
     }
 }

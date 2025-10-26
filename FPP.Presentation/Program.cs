@@ -1,6 +1,7 @@
 using FPP.Domain.Entities;
 using FPP.Infrastructure.DependencyInjection;
 using FPP.Infrastructure.Persistence;
+using FPP.Presentation.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,19 +16,20 @@ namespace FPP.Presentation
             builder.Services.AddDatabase(builder.Configuration);
             builder.Services.AddScopeInterface();
             builder.Services.AddRedisConfiguration(builder.Configuration);
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) // ??t scheme m?c ??nh là Cookie
-                .AddCookie(options => // Thêm trình x? lý Cookie
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) 
+                .AddCookie(options => 
                 {
-                    options.Cookie.Name = "FppAuthCookie"; // Tên cookie (tùy ch?n)
-                    options.LoginPath = "/Login";         // Trang chuy?n h??ng ??n n?u ch?a ??ng nh?p
-                    options.AccessDeniedPath = "/AccessDenied"; // Trang chuy?n h??ng n?u không có quy?n
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Th?i gian cookie h?t h?n (gi?ng trong LoginModel)
-                    options.SlidingExpiration = true; // T? ??ng gia h?n cookie n?u user ho?t ??ng
+                    options.Cookie.Name = "FppAuthCookie"; 
+                    options.LoginPath = "/Login";        
+                    options.AccessDeniedPath = "/AccessDenied"; 
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); 
+                    options.SlidingExpiration = true; 
                 });
 
-            // N?u b?n c?n Authorization (ki?m tra Role), ??m b?o b?n c?ng có dòng này:
+            builder.Services.AddSignalR();
+
             builder.Services.AddAuthorization();
-            // Add services to the container.
+
             builder.Services.AddRazorPages();
 
             var app = builder.Build();
@@ -90,9 +92,9 @@ namespace FPP.Presentation
                         // 2. Seed Users (NH? HASH M?T KH?U TH?C T?)
                         var users = new List<User>
                         {
-                            new User { Name = "Alice Student", Email = "student@fpt.edu.vn", PasswordHash = "hashed_password_student", Role = 1, CreatedAt = DateTime.UtcNow },
-                            new User { Name = "Bob Manager", Email = "manager@fpt.edu.vn", PasswordHash = "hashed_password_manager", Role = 2, CreatedAt = DateTime.UtcNow },
-                            new User { Name = "Charlie Security", Email = "security@fpt.edu.vn", PasswordHash = "hashed_password_security", Role = 3, CreatedAt = DateTime.UtcNow }
+                            new User { Name = "Alice Student", Email = "student@fpt.edu.vn", PasswordHash = "$2a$11$mpVvDZKE.t6WdFVlT3C/suguGEehj1u/VG3erzBehJubKEC/bzNoi", Role = 1, CreatedAt = DateTime.UtcNow }, //Thang2507@
+                            new User { Name = "Bob Manager", Email = "manager@fpt.edu.vn", PasswordHash = "$2a$11$mpVvDZKE.t6WdFVlT3C/suguGEehj1u/VG3erzBehJubKEC/bzNoi", Role = 2, CreatedAt = DateTime.UtcNow }, //Thang2507@
+                            new User { Name = "Charlie Security", Email = "security@fpt.edu.vn", PasswordHash = "$2a$11$mpVvDZKE.t6WdFVlT3C/suguGEehj1u/VG3erzBehJubKEC/bzNoi", Role = 3, CreatedAt = DateTime.UtcNow } //Thang2507@
                         };
                         db.Users.AddRange(users);
                         await db.SaveChangesAsync(); // Dùng await
@@ -218,6 +220,8 @@ namespace FPP.Presentation
             app.UseAuthorization();
 
             app.MapRazorPages();
+
+            app.MapHub<NotificationBookingHub>("/notificationBookingHub");
 
             app.Run();
         }
