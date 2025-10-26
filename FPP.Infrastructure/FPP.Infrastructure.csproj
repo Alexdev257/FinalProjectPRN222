@@ -27,4 +27,8 @@
     <ProjectReference Include="..\FPP.Application\FPP.Application.csproj" />
     <ProjectReference Include="..\FPP.Domain\FPP.Domain.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
 </Project>

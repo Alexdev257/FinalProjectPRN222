@@ -321,3 +321,4 @@ namespace FPP.Infrastructure.Persistence
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
+ 
