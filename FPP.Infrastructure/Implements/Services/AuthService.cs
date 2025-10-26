@@ -130,6 +130,10 @@ namespace FPP.Infrastructure.Implements.Services
             return await _unitOfWork.CompleteAsync();
         }
 
-        
+        public async Task<bool> CreateManagerAccount(User user)
+        {
+            _unitOfWork.Users.Add(user);
+            return await _unitOfWork.CompleteAsync();
+        }
     }
 }

@@ -162,6 +162,13 @@
                     width: 100%;
                 }
 
+            .nav-item.active {
+                color: #ff6b35;
+            }
+
+                .nav-item.active::after {
+                    width: 100%;
+                }
         .user-profile {
             display: flex;
             align-items: center;
@@ -193,12 +200,13 @@
         /* Page specific styles */
         .page-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 3.5rem; /* Slightly smaller than hero */
+            font-size: 4rem; /* Slightly smaller than hero */
             font-weight: 700;
             text-align: center;
             margin-bottom: 40px;
             color: #ff6b35;
             text-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+            margin-top: 30px;
         }
 
         .booking-section {
@@ -457,23 +465,26 @@
     <nav class="navbar">
         <div class="logo">FPT LAB</div>
         <div class="nav-menu">
-            <a asp-page="/Home" class="nav-item">Dashboard</a>
-            <a asp-page="/MyBookings" class="nav-item">My Bookings</a> @* TODO: Add "active" class logic if needed *@
+            <a asp-page="/Home" class="nav-item">Home</a>
+            <a asp-page="/MyBookings" class="nav-item active">My Bookings</a>
             <a asp-page="/Schedule" class="nav-item">Schedule</a>
+            <a asp-page="/CreateBooking" class="nav-item">Book Lab</a> @* Mark Book Lab as active *@
         </div>
         @if (Model.CurrentUser != null)
         {
-            <div class="user-profile">
-                <div class="user-avatar">👤</div>
-                <div>
-                    <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
-                    <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
+            <div style="display: flex; align-items: center; justify-content: space-around; gap: 20px;">
+                <div class="user-profile">
+                    <div class="user-avatar">👤</div>
+                    <div>
+                        <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
+                        <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
+                    </div>
                 </div>
-                @* Optional Logout Button *@
-                <form method="post" asp-page="/Logout" style="margin-left: auto;">
-                    @* Assume Logout page exists *@
-                    <button type="submit" class="nav-item" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
-                </form>
+                <div class="user-profile">
+                    <form method="post" asp-page-handler="Logout" style="margin-left: auto;">
+                        <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
+                    </form>
+                </div>
             </div>
         }
     </nav>

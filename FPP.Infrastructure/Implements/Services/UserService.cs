@@ -44,5 +44,14 @@ namespace FPP.Infrastructure.Implements.Services
             _unitOfWork.Users.Remove(user!);
             return await _unitOfWork.CompleteAsync();
         }
+
+        public async Task<List<User>> GetUsersByRoleAsync(decimal role)
+        {
+            return await _unitOfWork.Users.GetAllAsync()
+                .Where(u => u.Role == role)
+                .ToListAsync();
+        }
+
+
     }
 }

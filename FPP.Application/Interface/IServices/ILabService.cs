@@ -15,6 +15,8 @@ namespace FPP.Application.Interface.IServices
         Task<int> GetAvailableLabCountAsync();
         Task<List<LabZone>> GetZonesByLabIdAsync(int labId);
         Task<List<Lab>> GetAllLabsAsync();
+        Task<Lab?> GetLabByIdAsync(int labId);
+        Task<LabZone?> GetZoneByIdAsync(int zoneId);
 
     }
 }

@@ -1,6 +1,8 @@
 using FPP.Application.DTOs.Lab;
 using FPP.Application.Interface.IServices;
 using FPP.Domain.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
@@ -53,7 +55,6 @@ namespace FPP.Presentation.Pages
 
         public async Task<IActionResult> OnGetAsync()
         {
-            // --- 1. L?y thông tin User (dùng UserService) ---
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!int.TryParse(userIdString, out var userId))
             {
@@ -84,6 +85,13 @@ namespace FPP.Presentation.Pages
 
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostLogoutAsync()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToPage("/Login");
         }
     }
 }

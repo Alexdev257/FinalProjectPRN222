@@ -1,6 +1,8 @@
 using FPP.Application.DTOs.LabEvent;
 using FPP.Application.Interface.IServices;
 using FPP.Domain.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -83,6 +85,13 @@ namespace FPP.Presentation.Pages
             // If you need it for something else, inject and call ILabService.GetAllLabsAsync() here.
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostLogoutAsync()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToPage("/Login");
         }
 
         // Helpers remain the same
