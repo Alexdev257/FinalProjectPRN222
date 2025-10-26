@@ -161,6 +161,10 @@
                 color: #ff6b35;
             }
 
+                .nav-item:hover::after {
+                    width: 100%;
+                }
+
             .nav-item.active {
                 color: #ff6b35;
             }
@@ -200,7 +204,7 @@
         /* Booking Form Styles */
         .booking-form-container {
             width: 100%;
-            max-width: 700px; /* Limit form width */
+            max-width: 750px; /* Limit form width */
             background: rgba(10, 10, 10, 0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 107, 53, 0.3);
@@ -208,6 +212,7 @@
             padding: 40px;
             pointer-events: all;
             animation: fadeInForm 0.8s ease-out; /* Add fade-in */
+            margin-top: 30px;
         }
 
         @@keyframes fadeInForm {
@@ -412,6 +417,77 @@
             }
             /* Ensure it still spans */
         }
+
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23ff6b35' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px;
+            padding-right: 40px;
+        }
+
+            /* Style for select dropdown options */
+            .form-group select option {
+                background-color: #1a1a1a;
+                color: white;
+                padding: 10px;
+            }
+
+                .form-group select option:hover {
+                    background-color: rgba(255, 107, 53, 0.3);
+                }
+
+                .form-group select option:checked,
+                .form-group select option:focus {
+                    background-color: #4169E1;
+                    color: white;
+                }
+
+        /* Style calendar and time picker icons */
+        .form-group input[type="date"]::-webkit-calendar-picker-indicator,
+        .form-group input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.7) sepia(1) saturate(5) hue-rotate(3deg);
+            cursor: pointer;
+        }
+
+        /* Style date picker popup */
+        .form-group input[type="date"]::-webkit-datetime-edit {
+            color: white;
+        }
+
+        .form-group input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+            color: white;
+        }
+
+        .form-group input[type="date"]::-webkit-datetime-edit-text {
+            color: #999;
+        }
+
+        .form-group input[type="date"]::-webkit-datetime-edit-month-field,
+        .form-group input[type="date"]::-webkit-datetime-edit-day-field,
+        .form-group input[type="date"]::-webkit-datetime-edit-year-field {
+            color: white;
+        }
+
+        /* Style time picker */
+        .form-group input[type="time"]::-webkit-datetime-edit {
+            color: white;
+        }
+
+        .form-group input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+            color: white;
+        }
+
+        .form-group input[type="time"]::-webkit-datetime-edit-text {
+            color: #999;
+        }
+
+        .form-group input[type="time"]::-webkit-datetime-edit-hour-field,
+        .form-group input[type="time"]::-webkit-datetime-edit-minute-field,
+        .form-group input[type="time"]::-webkit-datetime-edit-ampm-field {
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -428,22 +504,26 @@
     <nav class="navbar">
         <div class="logo">FPT LAB</div>
         <div class="nav-menu">
-            <a asp-page="/Home" class="nav-item">Dashboard</a>
+            <a asp-page="/Home" class="nav-item">Home</a>
             <a asp-page="/MyBookings" class="nav-item">My Bookings</a>
             <a asp-page="/Schedule" class="nav-item">Schedule</a>
-            <a asp-page="/Booking/Create" class="nav-item active">Book Lab</a> @* Mark Book Lab as active *@
+            <a asp-page="/CreateBooking" class="nav-item active">Book Lab</a> @* Mark Book Lab as active *@
         </div>
         @if (Model.CurrentUser != null)
         {
-            <div class="user-profile">
-                <div class="user-avatar">👤</div>
-                <div>
-                    <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
-                    <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
+            <div style="display: flex; align-items: center; justify-content: space-around; gap: 20px;">
+                <div class="user-profile">
+                    <div class="user-avatar">👤</div>
+                    <div>
+                        <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
+                        <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
+                    </div>
                 </div>
-                <form method="post" asp-page="/Logout" style="margin-left: auto;">
-                    <button type="submit" class="nav-item" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
-                </form>
+                <div class="user-profile">
+                    <form method="post" asp-page-handler="Logout" style="margin-left: auto;">
+                        <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
+                    </form>
+                </div>
             </div>
         }
     </nav>
@@ -621,7 +701,7 @@
 
             try {
                 // Call the Page Handler using Fetch API
-                const response = await fetch(`/Booking/Create?handler=Zones&labId=${labId}`);
+                const response = await fetch(`/CreateBooking?handler=Zones&labId=${labId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

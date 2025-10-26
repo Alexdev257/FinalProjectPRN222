@@ -14,5 +14,7 @@ namespace FPP.Application.Interface.IServices
         Task<bool> Add(User user);
         Task<bool> Update(User user);
         Task<bool> Delete(int id);
+        Task<List<User>> GetUsersByRoleAsync(decimal role);
+        
     }
 }

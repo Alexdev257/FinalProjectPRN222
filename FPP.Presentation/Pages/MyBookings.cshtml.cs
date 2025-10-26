@@ -1,6 +1,8 @@
 using FPP.Application.Interface.IRepositories;
 using FPP.Application.Interface.IServices;
 using FPP.Domain.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -131,6 +133,13 @@ namespace FPP.Presentation.Pages
             }
 
             return RedirectToPage(); // Reload the MyBookings page
+        }
+
+        public async Task<IActionResult> OnPostLogoutAsync()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToPage("/Login");
         }
     }
 }

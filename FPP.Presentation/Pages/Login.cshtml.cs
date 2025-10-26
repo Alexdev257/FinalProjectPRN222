@@ -45,6 +45,27 @@ namespace FPP.Presentation.Pages
             // Trang load l?n ??u
         }
 
+        public async Task<IActionResult> OnPostCreateManagerAsync()
+        {
+            var user = new FPP.Domain.Entities.User
+            {
+                CreatedAt = DateTime.Now,
+                Email = "adminfpt@fpt.edu.vn",
+                Name = "Admin FPT",
+                PasswordHash = "Admin123@",
+                Role = 2,
+            };
+            var result = await _authService.CreateManagerAccount(user);
+            if (result)
+            {
+                return Page();
+            }
+            else
+            {
+                return RedirectToPage("/");    
+            }
+        }
+
         // === LOGIN ===
         public async Task<IActionResult> OnPostLoginAsync()
         {
@@ -93,11 +114,11 @@ namespace FPP.Presentation.Pages
             }
             else if (result.Role == 2)
             {
-                return RedirectToPage("Security/Home");
+                return RedirectToPage("/ManagerDashboard");
             }
             else if (result.Role == 3)
             {
-                return RedirectToPage("/Staff/Dashboard");
+                return RedirectToPage("/SecurityHome");
             }
             else
             {
