@@ -1,11 +1,13 @@
-﻿using FPP.Application.Interface.IRepositories;
-using FPP.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using FPP.Application.Interface.IRepositories;
+using FPP.Domain.Entities;
+using FPP.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace FPP.Infrastructure.Implements.Repositories
 {
@@ -45,6 +47,23 @@ namespace FPP.Infrastructure.Implements.Repositories
         {
             _dbSet.Remove(entity);
             //return await _context.SaveChangesAsync() > 0;
+        }
+
+        public IQueryable<T> GetAllAsync(Expression<Func<T, bool>>? predicate = null)
+        {
+            IQueryable<T> query = _dbSet.AsQueryable();
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            return query;
+        }
+
+        public IQueryable<T> Query()
+        {
+            return _dbSet.AsQueryable();
         }
     }
 }

@@ -40,6 +40,7 @@ namespace FPP.Infrastructure.DependencyInjection
             service.AddScoped<IEventParticipantService, EventParticipantService>();
             service.AddScoped<ILabEventService, LabEventService>();
             service.AddScoped<IActivityTypeService, ActivityTypeService>();
+            service.AddScoped<ISecurityLogService, SecurityLogService>();
         }
 
         public static void AddRedisConfiguration(this IServiceCollection service, IConfiguration configuration)

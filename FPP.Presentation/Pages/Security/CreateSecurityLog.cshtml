@@ -1,0 +1,26 @@
+﻿@page
+@model FPP.Presentation.Pages.Security.CreateSecurityLogModel
+@{
+}
+
+<h2 class="mb-3">Create Security Log</h2>
+<form method="post" enctype="multipart/form-data">
+
+	<div class="mb-3">
+		<label asp-for="SecurityLogRequest.Action" class="form-label">Action</label>
+		<input asp-for="SecurityLogRequest.Action" class="form-control" />
+		<span asp-validation-for="SecurityLogRequest.Action" class="text-danger"></span>
+	</div>
+	<div class="mb-3">
+		<label asp-for="SecurityLogRequest.Notes" class="form-label">Notes</label>
+		<textarea asp-for="SecurityLogRequest.Notes" class="form-control"></textarea>
+		<span asp-validation-for="SecurityLogRequest.Notes" class="text-danger"></span>
+	</div>
+	<div class="mb-3">
+		<label asp-for="SecurityLogRequest.PhotoUrl" class="form-label">Photo</label>
+		<input asp-for="SecurityLogRequest.PhotoUrl" class="form-control" />
+		<span asp-validation-for="SecurityLogRequest.PhotoUrl" class="text-danger"></span>
+	</div>
+	<button type="submit" class="btn btn-primary">Submit</button>
+	<a asp-page="/Security/SecurityLog" class="btn btn-secondary">Cancel</a>
+</form>

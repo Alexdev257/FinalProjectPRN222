@@ -1,0 +1,31 @@
+﻿@page "{id:int}"
+@model FPP.Presentation.Pages.Security.SecurityDetailsModel
+
+<h2>Event Details</h2>
+
+@if (Model.LabEvent != null)
+{
+    <div class="card p-3">
+        <p><strong>Title:</strong> @Model.LabEvent.Title</p>
+        <p><strong>Lab:</strong> @(Model.LabEvent.Lab?.Name ?? "N/A")</p>
+        <p><strong>Zone:</strong> @(Model.LabEvent.Zone?.Name ?? "N/A")</p>
+        <p><strong>Activity Type:</strong> @(Model.LabEvent.ActivityType?.Name ?? "N/A")</p>
+        <p><strong>Organizer:</strong> @(Model.LabEvent.Organizer?.Name ?? "N/A")</p>
+        <p><strong>Status:</strong> @(Model.LabEvent.Status ?? "N/A")</p>
+        <p><strong>Start:</strong> @Model.LabEvent.StartTime.ToString()</p>
+        <p><strong>End:</strong> @Model.LabEvent.EndTime.ToString()</p>
+        <p><strong>Description:</strong> @Model.LabEvent.Description</p>
+        @* <p><strong>Description:</strong> @Model.LabEvent.EndTime.ToString("dd/MM/yyyy")</p> *@
+    </div>
+}
+else
+{
+    <p class="text-danger">Event not found.</p>
+}
+
+<a asp-page="/Security/SecurityHome" class="btn btn-secondary mt-3">Back</a>
+<a asp-page="/Security/SecurityLog"
+   asp-route-eventId="@(Model.LabEvent.EventId)"
+   class="btn btn-secondary mt-3">
+    Log Event
+</a>
