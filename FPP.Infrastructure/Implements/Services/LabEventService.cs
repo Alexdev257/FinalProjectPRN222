@@ -146,5 +146,35 @@ namespace FPP.Infrastructure.Implements.Services
                 return (false, "An unexpected error occurred while saving the booking.");
             }
         }
+
+        public async Task<List<LabEvent>> GetAllBookingsWithDetailsAsync()
+        {
+            return await _unitOfWork.LabEvents.GetAllAsync()
+            .Include(e => e.Lab)
+            .Include(e => e.Zone)
+            .Include(e => e.Organizer)
+            .Include(e => e.ActivityType)
+            .OrderByDescending(e => e.CreatedAt)
+            .ToListAsync();
+        }
+
+        public async Task<LabEvent?> GetBookingByIdAsync(int eventId)
+        {
+            return await _unitOfWork.LabEvents.GetAllAsync()
+                .Include(e => e.Lab)
+                .Include(e => e.Zone)
+                .Include(e => e.Organizer)
+                .Include(e => e.ActivityType)
+                .FirstOrDefaultAsync(e => e.EventId == eventId);
+        }
+
+        public async Task<bool> UpdateBookingStatusAsync(int eventId, string status)
+        {
+            var booking = await _unitOfWork.LabEvents.GetByIdAsync(eventId);
+            if (booking == null) return false;
+
+            booking.Status = status;
+            return await _unitOfWork.CompleteAsync();
+        }
     }
 }
