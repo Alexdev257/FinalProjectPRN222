@@ -184,25 +184,25 @@ namespace FPP.Presentation.Pages.Booking
 
                 var notificationMessage = new
                 {
-                    Type = "NewBooking",
-                    Title = "New Booking Request",
-                    Message = $"{CurrentUser?.Name} has requested to book {lab?.Name} - {zone?.Name}",
-                    BookingDetails = new
+                    type = "NewBooking",
+                    title = "New Booking Request",
+                    message = $"{CurrentUser?.Name} has requested to book {lab?.Name} - {zone?.Name}",
+                    bookingDetails = new
                     {
-                        UserId = CurrentUser?.UserId,
-                        UserName = CurrentUser?.Name,
-                        UserEmail = CurrentUser?.Email,
-                        LabId = Input.LabId,
-                        Lab = lab?.Name,
-                        ZoneId = Input.ZoneId,
-                        Zone = zone?.Name,
-                        Date = Input.BookingDate.ToString("dd/MM/yyyy"),
-                        StartTime = Input.StartTime.ToString(@"hh\:mm"),
-                        EndTime = Input.EndTime.ToString(@"hh\:mm"),
-                        Activity = Input.Title,
-                        Description = Input.Description
+                        userId = CurrentUser?.UserId,
+                        userName = CurrentUser?.Name,
+                        userEmail = CurrentUser?.Email,
+                        labId = Input.LabId,
+                        lab = lab?.Name,
+                        zoneId = Input.ZoneId,
+                        zone = zone?.Name,
+                        date = Input.BookingDate.ToString("dd/MM/yyyy"),
+                        startTime = Input.StartTime.ToString(@"hh\:mm"),
+                        endTime = Input.EndTime.ToString(@"hh\:mm"),
+                        activity = Input.Title,
+                        description = Input.Description
                     },
-                    Timestamp = DateTime.Now
+                    timestamp = DateTime.Now
                 };
 
                 int sentCount = 0;
