@@ -673,6 +673,79 @@
             animation: pulse 1.5s ease-in-out infinite;
         }
 
+        /* Simple Action Toast */
+        .simple-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 10001;
+            animation: fadeInOut 3s ease-in-out;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+            .simple-toast.success {
+                background: linear-gradient(135deg, #4caf50, #45a049);
+                color: white;
+            }
+
+            .simple-toast.error {
+                background: linear-gradient(135deg, #f44336, #e53935);
+                color: white;
+            }
+
+        @@keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+
+            15%, 85% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* CSS cho Rejection Modal */
+        #rejectModalBody textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        #rejectError {
+            color: #f44336;
+            display: none;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* [MỚI] CSS cho text của modal xác nhận */
+        #confirmModalBody p {
+            font-size: 1.1rem;
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+
         /* Responsive */
         @@media (max-width: 768px) {
             .container {
@@ -703,7 +776,6 @@
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="logo">FPT LAB MANAGER</div>
         <div class="nav-right">
@@ -729,7 +801,6 @@
         </div>
     </nav>
 
-    <!-- Notification Panel -->
     <div class="notification-panel" id="notificationPanel">
         <div class="notification-panel-header">
             <h3><i class="fas fa-bell"></i> Notifications</h3>
@@ -746,15 +817,12 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="container">
-        <!-- Dashboard Header -->
         <div class="dashboard-header">
             <h1>Booking Management</h1>
             <p>Review and manage lab booking requests</p>
         </div>
 
-        <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-card-header">
@@ -794,7 +862,6 @@
             </div>
         </div>
 
-        <!-- Filter Tabs -->
         <div class="filter-tabs">
             <div class="filter-tab active" data-status="all" onclick="filterBookings('all')">
                 <i class="fas fa-list"></i> All Bookings
@@ -810,7 +877,6 @@
             </div>
         </div>
 
-        <!-- Bookings Table -->
         <div class="bookings-section">
             <h2 class="section-title">
                 <i class="fas fa-calendar-alt"></i>
@@ -857,7 +923,7 @@
                                     <div class="action-buttons">
                                         @if (booking.Status == "Pending")
                                         {
-                                            <button class="btn btn-approve" onclick="approveBooking(@booking.EventId)">
+                                            <button class="btn btn-approve" onclick="approveBooking(@booking.EventId, event)">
                                                 <i class="fas fa-check"></i> Approve
                                             </button>
                                             <button class="btn btn-reject" onclick="rejectBooking(@booking.EventId)">
@@ -885,7 +951,6 @@
         </div>
     </div>
 
-    <!-- Modal for Booking Details -->
     <div class="modal" id="bookingModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -895,14 +960,59 @@
                 </button>
             </div>
             <div id="modalBody">
-                <!-- Details will be loaded here -->
             </div>
         </div>
     </div>
 
+    <div class="modal" id="rejectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-comment-slash"></i> Reject Booking</h2>
+                <button class="close-modal" onclick="closeRejectModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="rejectModalBody">
+                <p style="color: #999; margin-bottom: 15px;">Please provide a reason for rejecting this booking.</p>
+                <textarea id="rejectionReason"
+                          rows="5"
+                          placeholder="e.g., Lab is scheduled for maintenance..."></textarea>
+                <small id="rejectError">Reason cannot be empty.</small>
+                <div class="modal-actions">
+                    <button class="btn btn-view" onclick="closeRejectModal()">Cancel</button>
+                    <button class="btn btn-reject" id="submitRejectBtn" onclick="submitRejection()">Submit Rejection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="confirmModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 id="confirmModalTitle"><i class="fas fa-question-circle"></i> Confirm Action</h2>
+                <button class="close-modal" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="confirmModalBody">
+                <p id="confirmModalText">Are you sure you want to proceed?</p>
+                <div class="modal-actions">
+                    <button class="btn btn-view" onclick="closeConfirmModal()">Cancel</button>
+                    <button class="btn btn-approve" id="confirmModalButton" onclick="">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script>
-        // SignalR Connection
+        // --- BIẾN TOÀN CỤC ---
+        let currentEventIdToReject = null;
+        let currentEventIdToApprove = null; // [MỚI]
+        let approveButtonElement = null; // [MỚI] Dùng để lưu nút approve đã nhấn
+
+        // --- KẾT NỐI SIGNALR ---
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/notificationBookingHub")
             .withAutomaticReconnect()
@@ -912,7 +1022,7 @@
             console.log("Received notification:", notification);
             showToastNotification(notification);
             playNotificationSound();
-            loadNotifications(); // Reload notifications
+            loadNotifications();
             setTimeout(() => {
                 refreshBookings();
             }, 5500);
@@ -923,16 +1033,12 @@
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-
                 oscillator.frequency.value = 1000;
                 oscillator.type = 'sine';
-
                 gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.3);
             } catch (e) {
@@ -943,19 +1049,18 @@
         connection.start()
             .then(function () {
                 console.log("SignalR Connected!");
-                loadNotifications(); // Load notifications on connect
+                loadNotifications();
             })
             .catch(function (err) {
                 console.error("SignalR Connection Error: ", err);
                 setTimeout(() => connection.start(), 5000);
             });
 
-        // Load notifications from database
+        // --- QUẢN LÝ PANEL THÔNG BÁO ---
         async function loadNotifications() {
             try {
                 const response = await fetch('/ManagerDashboard?handler=Notifications');
                 const data = await response.json();
-
                 if (data.success) {
                     displayNotifications(data.notifications);
                     updateBadgeCount(data.notifications);
@@ -965,18 +1070,15 @@
             }
         }
 
-        // Display notifications in panel
         function displayNotifications(notifications) {
             const listElement = document.getElementById('notificationList');
-
             if (!notifications || notifications.length === 0) {
                 listElement.innerHTML = `
                     <div class="notification-empty">
                         <i class="fas fa-bell-slash"></i>
                         <h4>No notifications</h4>
                         <p>You're all caught up!</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
@@ -984,7 +1086,6 @@
                 const timeAgo = getTimeAgo(new Date(notif.sentAt));
                 const unreadClass = !notif.isRead ? 'unread' : '';
                 const unreadDot = !notif.isRead ? '<span class="notification-unread-dot"></span>' : '';
-
                 return `
                     <div class="notification-item ${unreadClass}"
                          data-notification-id="${notif.notificationId}"
@@ -998,20 +1099,17 @@
                                 🏢 ${notif.eventDetails.lab || ''} - ${notif.eventDetails.zone || ''}<br>
                                 📅 ${new Date(notif.eventDetails.startTime).toLocaleDateString('en-GB')}<br>
                                 ⏰ ${new Date(notif.eventDetails.startTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})} -
-                                    ${new Date(notif.eventDetails.endTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})}
+                                   ${new Date(notif.eventDetails.endTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})}
                             </div>
                             <span class="notification-time">${timeAgo}</span>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         }
 
-        // Update badge count
         function updateBadgeCount(notifications) {
             const unreadCount = notifications.filter(n => !n.isRead).length;
             const badge = document.getElementById('notificationBadge');
-
             if (unreadCount > 0) {
                 badge.textContent = unreadCount;
                 badge.classList.add('show');
@@ -1020,7 +1118,6 @@
             }
         }
 
-        // Handle notification click
         async function handleNotificationClick(notificationId, isRead) {
             if (!isRead) {
                 try {
@@ -1030,9 +1127,7 @@
                             'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                         }
                     });
-
                     if (response.ok) {
-                        // Update UI
                         const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
                         if (notifElement) {
                             notifElement.classList.remove('unread');
@@ -1040,8 +1135,6 @@
                             if (dot) dot.remove();
                             notifElement.setAttribute('data-is-read', 'true');
                         }
-
-                        // Reload to update badge
                         loadNotifications();
                     }
                 } catch (error) {
@@ -1050,49 +1143,39 @@
             }
         }
 
-        // Toggle notification panel
         function toggleNotificationPanel() {
             const panel = document.getElementById('notificationPanel');
             panel.classList.toggle('show');
-
             if (panel.classList.contains('show')) {
                 loadNotifications();
             }
         }
 
-        // Close panel when clicking outside
         document.addEventListener('click', function(event) {
             const panel = document.getElementById('notificationPanel');
             const icon = document.querySelector('.notification-icon');
-
-            if (panel.classList.contains('show') &&
-                !panel.contains(event.target) &&
-                !icon.contains(event.target)) {
+            if (panel.classList.contains('show') && !panel.contains(event.target) && !icon.contains(event.target)) {
                 panel.classList.remove('show');
             }
         });
 
-        // Get time ago string
         function getTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
-
             if (seconds < 60) return 'Just now';
             if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
             if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
             if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
-
             return date.toLocaleDateString('en-GB');
         }
 
+        // --- HỆ THỐNG THÔNG BÁO ---
         function showToastNotification(notification) {
             try {
                 const toast = document.createElement('div');
                 toast.className = 'notification-toast';
-
                 const title = notification.title || "New Notification";
                 const message = notification.message || "";
                 const timestamp = notification.timestamp || new Date();
-
                 const details = notification.bookingDetails || {};
                 const lab = details.lab || "Unknown Lab";
                 const zone = details.zone || "Unknown Zone";
@@ -1101,7 +1184,6 @@
                 const endTime = details.endTime || "";
                 const userName = details.userName || "Unknown User";
                 const activity = details.activity || "";
-
                 toast.innerHTML = `
                     <div class="toast-header">
                         <i class="fas fa-bell"></i>
@@ -1117,28 +1199,36 @@
                             ⏰ ${startTime} - ${endTime}<br>
                             📝 ${activity}
                         </small>
-                    </div>
-                `;
-
+                    </div>`;
                 document.body.appendChild(toast);
-
                 setTimeout(() => {
                     toast.style.animation = 'slideOut 0.5s ease-out';
                     setTimeout(() => toast.remove(), 500);
                 }, 5000);
-
-                console.log("Toast displayed successfully");
             } catch (error) {
                 console.error("Error showing toast:", error);
             }
         }
 
+        function showSimpleToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `simple-toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // --- BỘ LỌC VÀ CẬP NHẬT GIAO DIỆN ---
         function filterBookings(status) {
             document.querySelectorAll('.filter-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.closest('.filter-tab').classList.add('active');
-
+            const activeTab = document.querySelector(`.filter-tab[data-status="${status}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
             const rows = document.querySelectorAll('#bookingsTableBody tr');
             rows.forEach(row => {
                 if (status === 'all' || row.dataset.status === status) {
@@ -1147,10 +1237,86 @@
                     row.style.display = 'none';
                 }
             });
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) {
+                const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+                if (visibleRows.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
         }
 
-        async function approveBooking(eventId) {
-            if (!confirm('Are you sure you want to approve this booking?')) return;
+        function applyCurrentFilter() {
+            const activeTab = document.querySelector('.filter-tab.active');
+            const status = activeTab ? activeTab.dataset.status : 'all';
+            filterBookings(status);
+        }
+
+        async function updateDashboardData() {
+            try {
+                document.getElementById('bookingsTableContainer').style.opacity = '0.5';
+                document.querySelector('.stats-grid').style.opacity = '0.5';
+
+                const response = await fetch(window.location.href);
+                if (!response.ok) throw new Error('Failed to fetch new data');
+
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+
+                document.getElementById('pendingCount').innerHTML = doc.getElementById('pendingCount').innerHTML;
+                document.getElementById('approvedCount').innerHTML = doc.getElementById('approvedCount').innerHTML;
+                document.getElementById('rejectedCount').innerHTML = doc.getElementById('rejectedCount').innerHTML;
+                document.getElementById('totalCount').innerHTML = doc.getElementById('totalCount').innerHTML;
+
+                const newTableContainer = doc.getElementById('bookingsTableContainer');
+                document.getElementById('bookingsTableContainer').innerHTML = newTableContainer.innerHTML;
+
+                document.getElementById('bookingsTableContainer').style.opacity = '1';
+                document.querySelector('.stats-grid').style.opacity = '1';
+
+                applyCurrentFilter();
+            } catch (error) {
+                console.error('Error refreshing dashboard data:', error);
+                location.reload();
+            }
+        }
+
+        function refreshBookings() {
+            updateDashboardData();
+        }
+
+        // --- HÀNH ĐỘNG BOOKING (ĐÃ CẬP NHẬT) ---
+
+        // [ĐÃ CẬP NHẬT] Hàm này giờ chỉ mở modal xác nhận
+        async function approveBooking(eventId, event) {
+            currentEventIdToApprove = eventId; // Lưu ID
+            approveButtonElement = event.target.closest('.btn-approve'); // Lưu nút
+
+            document.getElementById('confirmModalTitle').innerHTML = `<i class="fas fa-question-circle"></i> Approve Booking`;
+            document.getElementById('confirmModalText').innerText = 'Are you sure you want to approve this booking request?';
+
+            const confirmBtn = document.getElementById('confirmModalButton');
+            confirmBtn.innerHTML = 'Confirm Approve';
+            confirmBtn.className = 'btn btn-approve'; // Đảm bảo nút có màu xanh
+            confirmBtn.onclick = confirmApproveAction; // Gán hành động
+
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        // [MỚI] Hàm này được gọi khi nhấn "Confirm" trên modal
+        async function confirmApproveAction() {
+            const eventId = currentEventIdToApprove;
+            const button = approveButtonElement; // Lấy nút đã lưu
+
+            if (!eventId || !button) return;
+
+            closeConfirmModal(); // Đóng modal
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             try {
                 const response = await fetch(`/ManagerDashboard?handler=Approve&eventId=${eventId}`, {
@@ -1161,21 +1327,67 @@
                 });
 
                 if (response.ok) {
-                    alert('Booking approved successfully!');
-                    location.reload();
+                    showSimpleToast('Booking approved successfully!', 'success');
+                    await updateDashboardData();
+                } else {
+                    let errorMessage = 'Failed to approve booking.';
+                    try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.message) errorMessage = errorData.message;
+                    } catch (e) { /* Không phải JSON */ }
+                    showSimpleToast(errorMessage, 'error');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check"></i> Approve';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to approve booking');
+                showSimpleToast('An error occurred while approving.', 'error');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check"></i> Approve';
             }
         }
 
-        async function rejectBooking(eventId) {
-            const reason = prompt('Please enter rejection reason:');
-            if (!reason) return;
+        // [MỚI] Hàm để đóng modal confirm
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            currentEventIdToApprove = null;
+            approveButtonElement = null; // Xóa nút đã lưu
+        }
+
+        // [ĐÃ CẬP NHẬT] Hàm này giờ chỉ mở modal
+        function rejectBooking(eventId) {
+            currentEventIdToReject = eventId;
+            document.getElementById('rejectionReason').value = '';
+            document.getElementById('rejectError').style.display = 'none';
+            document.getElementById('rejectModal').style.display = 'flex';
+        }
+
+        // [MỚI] Hàm để đóng modal reject
+        function closeRejectModal() {
+            document.getElementById('rejectModal').style.display = 'none';
+            currentEventIdToReject = null;
+        }
+
+        // [MỚI] Hàm xử lý submit từ modal reject
+        async function submitRejection() {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            const errorEl = document.getElementById('rejectError');
+
+            if (!reason) {
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            errorEl.style.display = 'none';
+
+            if (!currentEventIdToReject) return;
+
+            const submitBtn = document.getElementById('submitRejectBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
             try {
-                const response = await fetch(`/ManagerDashboard?handler=Reject&eventId=${eventId}&reason=${encodeURIComponent(reason)}`, {
+                const response = await fetch(`/ManagerDashboard?handler=Reject&eventId=${currentEventIdToReject}&reason=${encodeURIComponent(reason)}`, {
                     method: 'POST',
                     headers: {
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
@@ -1183,17 +1395,68 @@
                 });
 
                 if (response.ok) {
-                    alert('Booking rejected successfully!');
-                    location.reload();
+                    closeRejectModal();
+                    showSimpleToast('Booking rejected successfully!', 'success');
+                    await updateDashboardData();
+                } else {
+                    let errorMessage = 'Failed to reject booking.';
+                    try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.message) errorMessage = errorData.message;
+                    } catch (e) { /* Không phải JSON */ }
+                    showSimpleToast(errorMessage, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to reject booking');
+                showSimpleToast('An error occurred while rejecting.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Rejection';
             }
         }
 
+        // --- MODAL XEM CHI TIẾT ---
         function viewBookingDetails(eventId) {
             const modal = document.getElementById('bookingModal');
+            const modalBody = document.getElementById('modalBody');
+
+             const row = event.target.closest('tr');
+             if (!row) {
+                modalBody.innerHTML = '<p>Could not load details.</p>';
+                modal.style.display = 'flex';
+                return;
+             }
+
+             const cells = row.querySelectorAll('td');
+             const student = cells[0].innerHTML;
+             const labZone = cells[1].innerHTML;
+             const dateTime = cells[2].innerHTML;
+             const activity = cells[3].innerHTML;
+             const status = cells[4].innerHTML;
+
+            modalBody.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">Student</div>
+                    <div class="detail-value">${student}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Lab / Zone</div>
+                    <div class="detail-value">${labZone}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Date & Time</div>
+                    <div class="detail-value">${dateTime}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Activity</div>
+                    <div class="detail-value">${activity}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">${status}</div>
+                </div>
+            `;
+
             modal.style.display = 'flex';
         }
 
@@ -1201,17 +1464,13 @@
             document.getElementById('bookingModal').style.display = 'none';
         }
 
-        function refreshBookings() {
-            location.reload();
-        }
-
+        // --- SỰ KIỆN TRANG ---
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && connection.state === signalR.HubConnectionState.Disconnected) {
                 connection.start();
             }
         });
 
-        // Load notifications on page load
         window.addEventListener('load', function() {
             loadNotifications();
         });

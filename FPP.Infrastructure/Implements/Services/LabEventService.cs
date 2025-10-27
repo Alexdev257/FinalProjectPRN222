@@ -1,5 +1,4 @@
-﻿using FPP.Application.DTOs;
-using FPP.Application.DTOs.LabEvent;
+﻿using FPP.Application.DTOs.LabEvent;
 using FPP.Application.Interface.IRepositories;
 using FPP.Application.Interface.IServices;
 using FPP.Domain.Entities;
