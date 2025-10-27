@@ -789,10 +789,16 @@
         </div>
         @if (Model.CurrentUser != null)
         {
-            <div class="nav-right">
-                <!-- Notification Bell -->
+            <div style="display: flex; align-items: center; justify-content: space-around; gap: 20px;">
                 <div class="user-profile">
-                    <form method="post" asp-page-handler="Logout" style="margin: 0;">
+                    <div class="user-avatar">👤</div>
+                    <div>
+                        <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
+                        <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <form method="post" asp-page-handler="Logout" style="margin-left: auto;">
                         <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
                     </form>
                 </div>
