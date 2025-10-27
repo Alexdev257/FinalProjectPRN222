@@ -16,7 +16,6 @@ namespace FPP.Presentation.Pages
         private readonly INotificationService _notificationService;
         private readonly IEventParticipantService _eventParticipantService;
 
-
         public HomeModel(
             IUserService userService,
             ILabService labService,
@@ -29,29 +28,22 @@ namespace FPP.Presentation.Pages
             _eventParticipantService = eventParticipantService;
         }
 
-        // --- Properties gi? nguyên ---
         public User CurrentUser { get; set; }
+
         [BindProperty]
         public int TotalLabCount { get; set; }
+
         [BindProperty]
         public int AvailableLabCount { get; set; }
+
         [BindProperty]
         public int MyUpcomingBookingsCount { get; set; }
+
         [BindProperty]
         public int UnreadNotificationCount { get; set; }
+
         [BindProperty]
         public List<LabVM> LabsList { get; set; } = new List<LabVM>();
-
-        // ViewModel gi? nguyên
-        //public class LabViewModel
-        //{
-        //    public int LabId { get; set; }
-        //    public string Name { get; set; } = string.Empty;
-        //    public string? Description { get; set; }
-        //    public string? Location { get; set; }
-        //    public bool IsAvailableNow { get; set; }
-        //}
-
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -61,36 +53,109 @@ namespace FPP.Presentation.Pages
                 return RedirectToPage("/Login");
             }
 
-            CurrentUser = await _userService.GetById(userId); // G?i service
+            CurrentUser = await _userService.GetById(userId);
             if (CurrentUser == null)
             {
                 return RedirectToPage("/Login");
             }
 
-
-            // --- 2. L?y Stats (dùng các services t??ng ?ng) ---
             TotalLabCount = _labService.GetTotalLabCountAsync();
             Console.WriteLine($"totalLab: {TotalLabCount}");
+
             AvailableLabCount = await _labService.GetAvailableLabCountAsync();
             Console.WriteLine($"AvailableLabCount: {AvailableLabCount}");
+
             UnreadNotificationCount = await _notificationService.CountUnreadNotificationsAsync(userId);
             Console.WriteLine($"UnreadNotificationCount: {UnreadNotificationCount}");
+
             MyUpcomingBookingsCount = await _eventParticipantService.CountUpcomingBookingsForUserAsync(userId);
             Console.WriteLine($"MyUpcomingBookingsCount: {MyUpcomingBookingsCount}");
 
-
-            // --- 3. L?y danh sách Labs (dùng LabService) ---
             LabsList = await _labService.GetAllLabsWithAvailabilityAsync();
             Console.WriteLine($"LabsList: {LabsList.Count}");
 
-
             return Page();
+        }
+
+        // Get all notifications for current student
+        public async Task<IActionResult> OnGetNotificationsAsync()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdString, out var userId))
+                return new JsonResult(new { success = false, message = "Unauthorized" });
+
+            try
+            {
+                var notifications = await _notificationService.GetNotificationsByUserIdAsync(userId);
+
+                var result = notifications.Select(n => new
+                {
+                    notificationId = n.NotificationId,
+                    message = n.Message,
+                    sentAt = n.SentAt,
+                    isRead = n.IsRead,
+                    eventDetails = new
+                    {
+                        eventId = n.Event.EventId,
+                        lab = n.Event.Lab?.Name,
+                        zone = n.Event.Zone?.Name,
+                        startTime = n.Event.StartTime,
+                        endTime = n.Event.EndTime,
+                        title = n.Event.Title,
+                        status = n.Event.Status
+                    }
+                }).ToList();
+
+                return new JsonResult(new { success = true, notifications = result });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching notifications: {ex.Message}");
+                return new JsonResult(new { success = false, message = "Failed to load notifications" });
+            }
+        }
+
+        // Get unread count
+        public async Task<IActionResult> OnGetUnreadCountAsync()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdString, out var userId))
+                return new JsonResult(new { success = false, message = "Unauthorized" });
+
+            try
+            {
+                var count = await _notificationService.GetUnreadCountAsync(userId);
+                return new JsonResult(new { success = true, count });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting unread count: {ex.Message}");
+                return new JsonResult(new { success = false, count = 0 });
+            }
+        }
+
+        // Mark notification as read
+        public async Task<IActionResult> OnPostMarkAsReadAsync(int notificationId)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdString, out var userId))
+                return new JsonResult(new { success = false, message = "Unauthorized" });
+
+            try
+            {
+                var success = await _notificationService.MarkAsReadAsync(notificationId);
+                return new JsonResult(new { success });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error marking as read: {ex.Message}");
+                return new JsonResult(new { success = false });
+            }
         }
 
         public async Task<IActionResult> OnPostLogoutAsync()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
             return RedirectToPage("/Login");
         }
     }

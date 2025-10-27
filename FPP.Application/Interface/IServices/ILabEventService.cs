@@ -1,5 +1,4 @@
-﻿using FPP.Application.DTOs;
-using FPP.Application.DTOs.LabEvent;
+﻿using FPP.Application.DTOs.LabEvent;
 using FPP.Domain.Entities;
 using System;
 using System.Collections.Generic;
