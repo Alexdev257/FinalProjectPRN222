@@ -1,0 +1,1404 @@
+﻿@page "/SecurityDashboard"
+@model FPP.Presentation.Pages.SecurityDashboardModel
+@{
+    ViewData["Title"] = "Security Dashboard";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Security Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        :root {
+            --primary: #ff6b35;
+            --primary-light: #f7931e;
+            --bg: #0a0a0a;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 107, 53, 0.3);
+            --text: #e0e0e0;
+            --text-muted: #999;
+            --success: #4caf50;
+            --warning: #ffc107;
+            --danger: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .notification-icon {
+            position: relative;
+            font-size: 1.4rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .notification-icon:hover {
+                transform: scale(1.15);
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .notification-badge.show {
+                display: flex;
+            }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 107, 53, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .logout-btn {
+            background: rgba(244, 67, 54, 0.15);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #f44336;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+            .logout-btn:hover {
+                background: #f44336;
+                color: white;
+            }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 380px;
+            max-height: 70vh;
+            background: rgba(15, 15, 15, 0.98);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(255, 107, 53, 0.25);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            animation: slideIn 0.3s ease-out;
+        }
+
+            .notification-panel.show {
+                display: flex;
+            }
+
+        @@keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-panel-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .notification-panel-header h3 {
+                color: var(--primary);
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.1rem;
+            }
+
+        .close-panel {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .close-panel:hover {
+                color: var(--primary);
+            }
+
+        .notification-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .notification-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+            .notification-empty i {
+                font-size: 3rem;
+                opacity: 0.3;
+                margin-bottom: 1rem;
+            }
+
+        .notification-item {
+            padding: 1rem;
+            margin: 0.5rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+
+            .notification-item:hover {
+                background: rgba(255, 107, 53, 0.1);
+                border-color: var(--primary);
+            }
+
+            .notification-item.unread {
+                border-left: 4px solid var(--primary);
+            }
+
+        .notification-unread-dot {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Toast Notifications */
+        .notification-toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 380px;
+            background: rgba(15, 15, 15, 0.98);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+            z-index: 10000;
+            animation: slideInRight 0.4s ease-out;
+            overflow: hidden;
+        }
+
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast-header {
+            padding: 1rem;
+            background: rgba(255, 107, 53, 0.1);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+            .toast-header i {
+                color: var(--primary);
+                font-size: 1.2rem;
+            }
+
+            .toast-header strong {
+                flex: 1;
+                color: var(--primary);
+            }
+
+        .toast-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .toast-body {
+            padding: 1rem;
+        }
+
+            .toast-body p {
+                margin-bottom: 0.5rem;
+            }
+
+            .toast-body small {
+                color: var(--text-muted);
+                line-height: 1.4;
+            }
+
+        .simple-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 1rem 1.5rem;
+            background: rgba(76, 175, 80, 0.95);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            animation: slideUp 0.3s ease-out;
+            font-weight: 600;
+        }
+
+            .simple-toast.error {
+                background: rgba(244, 67, 54, 0.95);
+            }
+
+        @@keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Dashboard */
+        .main-content {
+            margin-top: 90px;
+            padding: 2rem 0;
+        }
+
+        .dashboard-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .main-tabs {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .main-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .main-tab.active, .main-tab:hover {
+                color: var(--primary);
+                border-color: var(--primary);
+            }
+
+        .tab-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.4rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            transition: 0.3s;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(255, 107, 53, 0.2);
+                border-color: var(--primary);
+            }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 107, 53, 0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 0.6rem 1.2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+            .filter-tab.active, .filter-tab:hover {
+                background: rgba(255, 107, 53, 0.15);
+                border-color: var(--primary);
+                color: var(--primary);
+            }
+
+        /* Sections */
+        .events-section, .logs-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        tbody tr {
+            transition: 0.2s;
+        }
+
+            tbody tr:hover {
+                background: rgba(255, 107, 53, 0.05);
+            }
+
+        .status-badge {
+            padding: 0.4rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        .status-approved {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .status-rejected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-view {
+            background: rgba(255, 107, 53, 0.15);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+            .btn-view:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+        .btn-log {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+        }
+
+            .btn-log:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+            }
+
+        .photo-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid var(--border);
+        }
+
+            .photo-preview:hover {
+                transform: scale(1.1);
+                border-color: var(--primary);
+            }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+            .modal.show {
+                display: flex;
+            }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: rgba(15, 15, 15, 0.98);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @@keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .modal-header h2 {
+                color: var(--primary);
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.4rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+            .close-modal:hover {
+                color: var(--primary);
+                background: rgba(255, 107, 53, 0.1);
+            }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: var(--text);
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
+
+        .text-danger {
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.85rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+            }
+
+            .main-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .notification-panel, .notification-toast {
+                width: 95%;
+                right: 2.5%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .detail-row {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">FPT LAB SECURITY</div>
+        <div class="nav-right">
+            <div class="notification-icon" onclick="toggleNotificationPanel()">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600;">@Model.CurrentUser?.Name</div>
+                    <div style="font-size: 0.85rem; color: #999;">Security Officer</div>
+                </div>
+            </div>
+            <form method="post" asp-page-handler="Logout" style="margin: 0;">
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-panel-header">
+            <h3><i class="fas fa-bell"></i> Notifications</h3>
+            <button class="close-panel" onclick="toggleNotificationPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <div class="notification-empty">
+                <i class="fas fa-bell-slash"></i>
+                <h4>No notifications</h4>
+                <p>You're all caught up!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container main-content">
+        <div class="dashboard-header">
+            <h1>Security Dashboard</h1>
+            <p>Monitor lab events and create security logs</p>
+        </div>
+
+        <div class="main-tabs">
+            <button class="main-tab active" onclick="switchTab('events')">
+                <i class="fas fa-calendar-alt"></i> Events
+                <span class="tab-badge" id="eventsBadge">@Model.LabEvents.Count</span>
+            </button>
+            <button class="main-tab" onclick="switchTab('logs')">
+                <i class="fas fa-shield-alt"></i> Security Logs
+                <span class="tab-badge" id="logsBadge">@Model.SecurityLogs.Count</span>
+            </button>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="eventsTab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="stat-value">@Model.LabEvents.Count</div>
+                    <div class="stat-label">Total Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-value">@Model.LabEvents.Count(e => e.StartTime.Date == DateTime.Today)</div>
+                    <div class="stat-label">Today's Events</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-value">@Model.SecurityLogs.Count</div>
+                    <div class="stat-label">Logs Created</div>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-status="all" onclick="filterEvents('all')">
+                    <i class="fas fa-list"></i> All Events
+                </div>
+                <div class="filter-tab" data-status="pending" onclick="filterEvents('pending')">
+                    <i class="fas fa-clock"></i> Pending
+                </div>
+                <div class="filter-tab" data-status="approved" onclick="filterEvents('approved')">
+                    <i class="fas fa-check"></i> Approved
+                </div>
+            </div>
+
+            <div class="events-section">
+                <h2 class="section-title"><i class="fas fa-calendar-alt"></i> Lab Events</h2>
+                <div id="eventsTableContainer">
+                    <table class="events-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Lab / Zone</th>
+                                <th>Date & Time</th>
+                                <th>Organizer</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventsTableBody">
+                            @foreach (var e in Model.LabEvents)
+                            {
+                                <tr data-status="@e.Status.ToLower()">
+                                    <td><strong>@e.Title</strong></td>
+                                    <td>
+                                        <strong>@(e.Lab?.Name ?? "—")</strong><br>
+                                        <small style="color:#999;">@(e.Zone?.Name ?? "—")</small>
+                                    </td>
+                                    <td>
+                                        <strong>@e.StartTime.ToString("dd/MM/yyyy")</strong><br>
+                                        <small style="color:#999;">@e.StartTime.ToString("HH:mm") - @e.EndTime.ToString("HH:mm")</small>
+                                    </td>
+                                    <td><strong>@(e.Organizer?.Name ?? "—")</strong></td>
+                                    <td><span class="status-badge status-@e.Status.ToLower()">@e.Status</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-view" onclick="viewEvent(@e.EventId)">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                            <button class="btn btn-log" onclick="openLogModal(@e.EventId, '@e.Title')">
+                                                <i class="fas fa-clipboard-check"></i> Log
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div id="logsTab" class="tab-content">
+            <div class="logs-section">
+                <h2 class="section-title"><i class="fas fa-shield-alt"></i> My Security Logs</h2>
+                <table class="logs-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Action</th>
+                            <th>Event</th>
+                            <th>Notes</th>
+                            <th>Photo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model.SecurityLogs)
+                        {
+                            <tr>
+                                <td>@log.Timestamp.ToString("dd/MM HH:mm")</td>
+                                <td><span class="status-badge status-approved">@log.Action</span></td>
+                                <td>
+                                    <strong>@log.EventTitle</strong><br>
+                                    <small style="color:#999;">@log.LabName - @log.ZoneName</small>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(log.Notes) ? "—" : log.Notes)</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.PhotoUrl))
+                                    {
+                                        <img src="@log.PhotoUrl" class="photo-preview" onclick="viewPhoto('@log.PhotoUrl')" alt="Log photo">
+                                    }
+                                    else
+                                    {
+                                        <small style="color:#666;">No photo</small>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> Event Details</h2>
+                <button class="close-modal" onclick="closeModal('eventModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="eventModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Create Log Modal -->
+    <div class="modal" id="logModal">
+        <div class="modal-content">
+            <form id="logForm" method="post" asp-page-handler="CreateLog">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h2><i class="fas fa-clipboard-check"></i> <span id="logModalTitle">Create Security Log</span></h2>
+                    <button type="button" class="close-modal" onclick="closeModal('logModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="logEventId" name="EventId" />
+
+                    <div class="form-group">
+                        <label>Action <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="Action" required placeholder="e.g., Lab Access Check, Equipment Inspection" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea class="form-control" name="Notes" rows="4" placeholder="Additional details about this security log..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Photo URL</label>
+                        <input type="url" class="form-control" name="PhotoUrl" placeholder="https://example.com/photo.jpg" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-view" onclick="closeModal('logModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-log">
+                        <i class="fas fa-save"></i> Submit Log
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div class="modal" id="photoModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-image"></i> Photo</h2>
+                <button class="close-modal" onclick="closeModal('photoModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <img id="fullPhoto" src="" style="max-width:100%; border-radius:8px;" alt="Full size photo">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        // SignalR Connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationBookingHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveSecurityNotification", data => {
+            console.log("Received security notification:", data);
+            showToastNotification(data);
+            loadNotifications();
+            refreshDashboard();
+        });
+
+        connection.start()
+            .then(() => {
+                console.log("SignalR Connected");
+                loadNotifications();
+            })
+            .catch(err => console.error("SignalR Connection Error:", err));
+
+        // Toast Notification
+        function showToastNotification(notif) {
+            const toast = document.createElement('div');
+            toast.className = 'notification-toast';
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <i class="fas fa-bell"></i>
+                    <strong>${notif.title || notif.Title || "New Notification"}</strong>
+                    <span class="toast-time">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="toast-body">
+                    <p><strong>${notif.message || notif.Message}</strong></p>
+                    ${notif.bookingDetails || notif.BookingDetails ? `
+                        <small>
+                            ${(notif.bookingDetails || notif.BookingDetails).lab || (notif.bookingDetails || notif.BookingDetails).Lab} -
+                            ${(notif.bookingDetails || notif.BookingDetails).zone || (notif.bookingDetails || notif.BookingDetails).Zone}<br>
+                            ${(notif.bookingDetails || notif.BookingDetails).date || (notif.bookingDetails || notif.BookingDetails).Date}
+                        </small>
+                    ` : ''}
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-out forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        function showSimpleToast(msg, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `simple-toast ${type}`;
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Tab Management
+        function switchTab(tab) {
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.closest('.main-tab').classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        // Filter Events
+        function filterEvents(status) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('#eventsTableBody tr').forEach(r => {
+                r.style.display = (status === 'all' || r.dataset.status === status) ? '' : 'none';
+            });
+        }
+
+        // View Event Details
+        async function viewEvent(id) {
+            try {
+                const res = await fetch(`/SecurityDashboard?handler=EventDetails&id=${id}`);
+                const html = await res.text();
+                document.getElementById('eventModalBody').innerHTML = html;
+                document.getElementById('eventModal').classList.add('show');
+            } catch (error) {
+                console.error('Error loading event details:', error);
+                showSimpleToast('Failed to load event details', 'error');
+            }
+        }
+
+        // Open Log Modal
+        function openLogModal(id, title) {
+            document.getElementById('logEventId').value = id;
+            document.getElementById('logModalTitle').textContent = `Log: ${title}`;
+            document.getElementById('logModal').classList.add('show');
+        }
+
+        // Submit Log Form
+        document.getElementById('logForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                const formData = new FormData(this);
+
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                const res = await fetch('/SecurityDashboard?handler=CreateLog', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success) {
+                        closeModal('logModal');
+                        showSimpleToast('Security log created successfully!', 'success');
+                        this.reset();
+                        setTimeout(() => {
+                            refreshDashboard();
+                            loadNotifications();
+                        }, 500);
+                    } else {
+                        showSimpleToast(json.message || 'Failed to create log', 'error');
+                    }
+                } else {
+                    const errorText = await res.text();
+                    console.error('Server error:', errorText);
+                    showSimpleToast('Server error. Please try again.', 'error');
+                }
+            } catch (err) {
+                console.error('Error creating log:', err);
+                showSimpleToast('Network error. Please check your connection.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // View Photo
+        function viewPhoto(url) {
+            document.getElementById('fullPhoto').src = url;
+            document.getElementById('photoModal').classList.add('show');
+        }
+
+        // Close Modal
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // Load Notifications
+        async function loadNotifications() {
+            try {
+                const res = await fetch('/SecurityDashboard?handler=Notifications');
+                const data = await res.json();
+
+                if (data.success) {
+                    const list = document.getElementById('notificationList');
+
+                    if (data.notifications && data.notifications.length > 0) {
+                        list.innerHTML = data.notifications.map(n => `
+                            <div class="notification-item ${n.isRead ? '' : 'unread'}" onclick="markRead(${n.id})">
+                                ${!n.isRead ? '<span class="notification-unread-dot"></span>' : ''}
+                                <div class="notification-content">
+                                    <div class="notification-message">${n.message}</div>
+                                    <span class="notification-time">${getTimeAgo(n.sentAt)}</span>
+                                </div>
+                            </div>
+                        `).join('');
+
+                        const badge = document.getElementById('notificationBadge');
+                        const count = data.notifications.filter(n => !n.isRead).length;
+                        badge.textContent = count;
+                        badge.classList.toggle('show', count > 0);
+                    } else {
+                        list.innerHTML = `
+                            <div class="notification-empty">
+                                <i class="fas fa-bell-slash"></i>
+                                <h4>No notifications</h4>
+                                <p>You're all caught up!</p>
+                            </div>
+                        `;
+                        document.getElementById('notificationBadge').classList.remove('show');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        // Mark Notification as Read
+        async function markRead(id) {
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                await fetch(`/SecurityDashboard?handler=MarkRead&id=${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    }
+                });
+                loadNotifications();
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        // Toggle Notification Panel
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notificationPanel');
+            panel.classList.toggle('show');
+            if (panel.classList.contains('show')) {
+                loadNotifications();
+            }
+        }
+
+        // Get Time Ago
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            return Math.floor(seconds / 86400) + 'd ago';
+        }
+
+        // Refresh Dashboard
+        async function refreshDashboard() {
+            try {
+                const res = await fetch('/SecurityDashboard');
+                const html = await res.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+
+                ['eventsBadge', 'logsBadge'].forEach(id => {
+                    const el = doc.getElementById(id);
+                    if (el) document.getElementById(id).textContent = el.textContent;
+                });
+
+                const container = doc.getElementById('eventsTableContainer');
+                if (container) {
+                    document.getElementById('eventsTableContainer').innerHTML = container.innerHTML;
+                }
+
+                // Refresh logs table
+                const logsSection = doc.querySelector('.logs-section table tbody');
+                if (logsSection) {
+                    document.querySelector('.logs-section table tbody').innerHTML = logsSection.innerHTML;
+                }
+            } catch (error) {
+                console.error('Error refreshing dashboard:', error);
+            }
+        }
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+
+        // Close notification panel on outside click
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('notificationPanel');
+            const icon = document.querySelector('.notification-icon');
+            if (panel.classList.contains('show') && !panel.contains(e.target) && !icon.contains(e.target)) {
+                panel.classList.remove('show');
+            }
+        });
+    </script>
+    @Html.AntiForgeryToken()
+</body>
+</html>

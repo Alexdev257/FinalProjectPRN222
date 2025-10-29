@@ -210,5 +210,50 @@ namespace FPP.Infrastructure.Implements.Services
                 Notes = securityLog.Notes
             });
         }
+
+        public async Task<bool> AcknowledgeSecurityLogAsync(int logId, int managerId, string note)
+        {
+            var log = await _unitOfWork.SecurityLogs.GetByIdAsync(logId);
+            if (log == null) return false;
+
+            var manager = await _unitOfWork.Users.GetByIdAsync(managerId);
+            var prefix = $"[Manager Acknowledged by {manager.Name} at {DateTime.Now:dd/MM/yyyy HH:mm}]\n";
+
+            log.Notes = prefix + note + "\n\n" + (log.Notes ?? "");
+            log.Status = "Acknowledged"; // GÁN TRỰC TIẾP
+
+            _unitOfWork.SecurityLogs.Update(log);
+            return await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<IEnumerable<SecurityLogResponse>> GetSecurityLogsBySecurityIdAsync(int securityId)
+        {
+            var logs = await _unitOfWork.SecurityLogs.GetAllAsync()
+                .Where(sl => sl.SecurityId == securityId)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Lab)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Zone)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Organizer)
+                .OrderByDescending(sl => sl.Timestamp)
+                .Select(sl => new SecurityLogResponse
+                {
+                    LogId = sl.LogId,
+                    Action = sl.Action,
+                    Notes = sl.Notes,
+                    PhotoUrl = sl.PhotoUrl,
+                    Timestamp = sl.Timestamp,
+                    EventId = sl.EventId,
+                    SecurityId = sl.SecurityId,
+                    EventTitle = sl.Event.Title,
+                    LabName = sl.Event.Lab.Name,
+                    ZoneName = sl.Event.Zone.Name,
+                    OrganizerName = sl.Event.Organizer.Name
+                })
+                .ToListAsync();
+
+            return logs;
+        }
     }
 }

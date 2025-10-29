@@ -1,6 +1,7 @@
 using FPP.Application.Interface.IRepositories;
 using FPP.Application.Interface.IServices;
 using FPP.Domain.Entities;
+using FPP.Infrastructure.Implements.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -16,14 +17,16 @@ namespace FPP.Presentation.Pages
     {
         private readonly IUnitOfWork _unitOfWork; // Inject UoW
         private readonly ILabEventService _labEventService; // Inject Event Service for cancelling
+        private readonly INotificationService _notificationService; // For notifications
         private readonly IUserService _userService; // To get current user info for display
 
 
-        public MyBookingsModel(IUnitOfWork unitOfWork, ILabEventService labEventService, IUserService userService)
+        public MyBookingsModel(IUnitOfWork unitOfWork, ILabEventService labEventService, IUserService userService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _labEventService = labEventService;
             _userService = userService;
+            _notificationService = notificationService;
         }
 
         public User CurrentUser { get; set; }
@@ -140,6 +143,27 @@ namespace FPP.Presentation.Pages
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return RedirectToPage("/Login");
+        }
+
+        public async Task<IActionResult> OnGetNotificationsAsync()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var notifications = await _notificationService.GetNotificationsByUserIdAsync(userId);
+            return new JsonResult(new { success = true, notifications });
+        }
+
+        public async Task<IActionResult> OnGetUnreadCountAsync()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var count = await _notificationService.GetUnreadCountAsync(userId);
+            return new JsonResult(new { success = true, count });
+        }
+
+        public async Task<IActionResult> OnPostMarkAsReadAsync(int notificationId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _notificationService.MarkAsReadAsync(notificationId);
+            return new OkResult();
         }
     }
 }

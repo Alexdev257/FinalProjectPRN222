@@ -18,5 +18,17 @@ namespace FPP.Application.Interface.IServices
         Task<List<LabEvent>> GetAllBookingsWithDetailsAsync();
         Task<LabEvent?> GetBookingByIdAsync(int eventId);
         Task<bool> UpdateBookingStatusAsync(int eventId, string status);
+
+        Task<LabEvent?> GetBookingWithDetailsAsync(int eventId);
+        Task<List<SecurityLog>> GetSecurityLogsByEventIdAsync(int eventId);
+        Task<List<EventParticipant>> GetEventParticipantsAsync(int eventId);
+
+        Task<List<SecurityLog>> GetAllSecurityLogsWithDetailsAsync();
+        Task<List<SecurityLog>> GetSecurityLogsByLabIdAsync(int labId);
+        Task<List<SecurityLog>> GetPendingSecurityLogsAsync();
+        Task<SecurityLog?> GetSecurityLogByIdAsync(int logId);
+        Task<bool> UpdateSecurityLogNotesAsync(int logId, string notes);
+        Task<bool> AcknowledgeSecurityLogAsync(int logId, int managerId, string note);
+
     }
 }

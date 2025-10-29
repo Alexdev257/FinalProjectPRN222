@@ -337,6 +337,14 @@ namespace FPP.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("security_id");
 
+                    b.Property<string>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasDefaultValue("Pending Review")
+                        .HasColumnName("status");
+
                     b.Property<DateTime>("Timestamp")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
