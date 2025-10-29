@@ -18,6 +18,7 @@ public partial class SecurityLog
     public string? PhotoUrl { get; set; }
 
     public string? Notes { get; set; }
+    public string? Status { get; set; }
 
     public virtual LabEvent Event { get; set; } = null!;
 

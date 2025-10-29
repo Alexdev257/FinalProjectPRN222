@@ -1,0 +1,661 @@
+﻿@page "/Schedule"
+@model FPP.Presentation.Pages.ScheduleModel
+@{
+    ViewData["Title"] = "My Lab Calendar";
+    Layout = null; // Assuming no shared layout
+    // Lấy thông tin tháng/năm hiện tại và tháng trước/sau
+    var currentMonthDate = new DateTime(Model.Year, Model.Month, 1);
+    var prevMonth = Model.GetPreviousMonth();
+    var nextMonth = Model.GetNextMonth();
+    // Lấy số ngày cần bù vào đầu tháng (để ngày 1 nằm đúng cột)
+    // Điều chỉnh để tuần bắt đầu từ Thứ Hai (Monday) theo chuẩn Việt Nam/ISO
+    int firstDayOffset = ((int)Model.FirstDayOfWeekOfMonth - (int)DayOfWeek.Monday + 7) % 7;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/notifications.css" />
+    <style>
+        /* --- COPY ALL CSS FROM Home.cshtml HERE --- */
+        @@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #000;
+            overflow-x: hidden;
+            color: white;
+            perspective: 1000px;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hud-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6b35, transparent);
+            animation: scanMove 4s linear infinite;
+            box-shadow: 0 0 20px #ff6b35;
+        }
+
+        .corner-frame {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #ff6b35;
+            opacity: 0.6;
+        }
+
+            .corner-frame.tl {
+                top: 20px;
+                left: 20px;
+                border-right: none;
+                border-bottom: none;
+            }
+
+            .corner-frame.tr {
+                top: 20px;
+                right: 20px;
+                border-left: none;
+                border-bottom: none;
+            }
+
+            .corner-frame.bl {
+                bottom: 20px;
+                left: 20px;
+                border-right: none;
+                border-top: none;
+            }
+
+            .corner-frame.br {
+                bottom: 20px;
+                right: 20px;
+                border-left: none;
+                border-top: none;
+            }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            padding: 100px 60px 60px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 25px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+            z-index: 100;
+            pointer-events: all;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-item {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+            .nav-item::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: #ff6b35;
+                transition: width 0.3s;
+            }
+
+            .nav-item:hover {
+                color: #ff6b35;
+            }
+
+                .nav-item:hover::after {
+                    width: 100%;
+                }
+
+            .nav-item.active {
+                color: #ff6b35;
+            }
+
+                .nav-item.active::after {
+                    width: 100%;
+                }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+            .user-profile:hover {
+                background: rgba(255, 107, 53, 0.2);
+                box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+            }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Page specific styles */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            pointer-events: all;
+            margin-top: 30px;
+        }
+
+        .calendar-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ff6b35;
+            text-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+        }
+
+        .calendar-nav a {
+            color: #ff6b35;
+            text-decoration: none;
+            font-size: 1.5rem;
+            padding: 5px 15px;
+            border: 1px solid rgba(255, 107, 53, 0.5);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+            .calendar-nav a:hover {
+                background: rgba(255, 107, 53, 0.2);
+                box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+            }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px; /* Đường kẻ mảnh giữa các ô */
+            background: rgba(255, 107, 53, 0.2); /* Màu đường kẻ */
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            pointer-events: all;
+        }
+
+        .calendar-header-cell {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 5px;
+            text-align: center;
+            font-weight: 600;
+            color: #ff9a70;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .calendar-day-cell {
+            min-height: 120px; /* Chiều cao tối thiểu cho ô ngày */
+            background: rgba(5, 5, 5, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            position: relative;
+            overflow: hidden; /* Ẩn nội dung tràn */
+            transition: background 0.3s;
+            display: flex; /* Use flexbox */
+            flex-direction: column; /* Stack day number and bookings */
+        }
+
+            .calendar-day-cell.other-month {
+                background: rgba(0, 0, 0, 0.5);
+            }
+            /* Ô của tháng khác */
+            .calendar-day-cell.today {
+                border: 2px solid #ff6b35;
+                padding: 8px; /* Adjust padding due to border */
+            }
+            /* Highlight ngày hôm nay */
+            .calendar-day-cell:hover {
+                background: rgba(20, 10, 5, 0.8);
+            }
+
+        .day-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #ccc;
+            margin-bottom: 8px;
+            text-align: right;
+        }
+
+        .today .day-number {
+            color: #ff6b35;
+            font-weight: 700;
+        }
+
+        .other-month .day-number {
+            color: #555;
+        }
+
+        .day-bookings {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            flex-grow: 1; /* Allow bookings to fill space */
+            overflow-y: auto; /* Thêm scroll nếu nhiều booking */
+            /* Custom scrollbar (optional) */
+            scrollbar-width: thin;
+            scrollbar-color: #ff6b35 rgba(255, 107, 53, 0.1);
+        }
+
+            .day-bookings::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .day-bookings::-webkit-scrollbar-track {
+                background: rgba(255, 107, 53, 0.1);
+                border-radius: 3px;
+            }
+
+            .day-bookings::-webkit-scrollbar-thumb {
+                background-color: #ff6b35;
+                border-radius: 3px;
+            }
+
+
+        .booking-item {
+            display: block; /* Mỗi booking một dòng */
+            background: rgba(255, 107, 53, 0.1);
+            border-left: 3px solid #ff6b35;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Dấu ... nếu quá dài */
+            color: #eee;
+            cursor: pointer; /* Cho biết có thể click */
+            transition: background 0.2s;
+            text-decoration: none; /* Remove underline from link */
+        }
+
+            .booking-item:hover {
+                background: rgba(255, 107, 53, 0.3);
+            }
+
+            .booking-item .time {
+                color: #ff9a70;
+                font-weight: 500;
+                margin-right: 5px;
+            }
+
+
+        /* --- Keyframes & Media Queries (Copied from Home.cshtml) --- */
+        @@keyframes scanMove {
+            0% {
+                top: 0;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        @@keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @@keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @@media (max-width: 1024px) { /* Adjust styles for smaller screens if needed */
+        }
+
+        @@media (max-width: 768px) {
+            .navbar {
+                padding: 20px 30px;
+            }
+
+            .main-container {
+                padding: 80px 15px 40px;
+            }
+            /* Less horizontal padding */
+            .nav-menu {
+                display: none;
+            }
+
+            .calendar-title {
+                font-size: 1.8rem;
+            }
+
+            .calendar-nav a {
+                font-size: 1.2rem;
+                padding: 3px 10px;
+            }
+
+            .calendar-header-cell {
+                font-size: 0.7rem;
+                padding: 10px 2px;
+            }
+
+            .calendar-day-cell {
+                min-height: 80px;
+                padding: 5px;
+            }
+
+            .today {
+                padding: 3px;
+            }
+            /* Adjust padding for today on mobile */
+            .day-number {
+                font-size: 0.9rem;
+                margin-bottom: 4px;
+            }
+
+            .day-bookings {
+                font-size: 0.7rem;
+            }
+
+            .booking-item {
+                padding: 2px 5px;
+                margin-bottom: 2px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="hud-overlay">
+        <div class="scan-line"></div>
+        <div class="corner-frame tl"></div>
+        <div class="corner-frame tr"></div>
+        <div class="corner-frame bl"></div>
+        <div class="corner-frame br"></div>
+    </div>
+
+    @* --- Navbar --- *@
+    <nav class="navbar">
+        <div class="logo">FPT LAB</div>
+        <div class="nav-menu">
+            <a asp-page="/Home" class="nav-item">Home</a>
+            <a asp-page="/MyBookings" class="nav-item">My Bookings</a>
+            <a asp-page="/Schedule" class="nav-item active">Schedule</a>
+            <a asp-page="/CreateBooking" class="nav-item">Book Lab</a> @* Mark Book Lab as active *@
+        </div>
+        @if (Model.CurrentUser != null)
+        {
+            <div style="display: flex; align-items: center; justify-content: space-around; gap: 20px;">
+                <div class="user-profile">
+                    <div class="user-avatar">👤</div>
+                    <div>
+                        <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
+                        <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <form method="post" asp-page-handler="Logout" style="margin-left: auto;">
+                        <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </nav>
+
+    <div class="main-container">
+
+        @* --- Calendar Header --- *@
+        <div class="calendar-header">
+            <div class="calendar-nav">
+                <a asp-page="/Schedule" asp-route-year="@prevMonth.Year" asp-route-month="@prevMonth.Month" title="@prevMonth.ToString("MMMM yyyy")">&lt; Prev</a>
+            </div>
+            <div class="calendar-title">@currentMonthDate.ToString("MMMM yyyy")</div>
+            <div class="calendar-nav">
+                <a asp-page="/Schedule" asp-route-year="@nextMonth.Year" asp-route-month="@nextMonth.Month" title="@nextMonth.ToString("MMMM yyyy")">Next &gt;</a>
+            </div>
+        </div>
+
+        @* --- Calendar Grid --- *@
+        <div class="calendar-grid">
+            @* Header Row (Days of Week - Starting Monday) *@
+            @{
+                var dayNames = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            }
+            @foreach (var dayName in dayNames)
+            {
+                <div class="calendar-header-cell">@dayName</div>
+            }
+
+            @{
+                int currentDay = 1;
+                bool isCurrentMonth = false;
+            }
+            @* Loop through cells (max 6 weeks * 7 days) *@
+            @for (int cell = 0; cell < 42; cell++) // 6 weeks max needed
+            {
+                string cellClass = "calendar-day-cell";
+                int dayOfMonth = 0;
+                List<FPP.Application.DTOs.LabEvent.BookingCalendarItem> bookingsForThisDay = null;
+
+                // Check if this cell is part of the current month
+                if (cell >= firstDayOffset && currentDay <= Model.DaysInMonth)
+                {
+                    isCurrentMonth = true;
+                    dayOfMonth = currentDay;
+                    // Check if today
+                    if (currentMonthDate.AddDays(currentDay - 1).Date == DateTime.Today)
+                    {
+                        cellClass += " today";
+                    }
+                    // Get bookings for this day
+                    Model.UserBookingsForMonth.TryGetValue(dayOfMonth, out bookingsForThisDay);
+                    currentDay++;
+                }
+                else
+                {
+                    isCurrentMonth = false;
+                    cellClass += " other-month";
+                }
+
+                <div class="@cellClass">
+                    @if (isCurrentMonth)
+                    {
+                        <div class="day-number">@dayOfMonth</div>
+                        @if (bookingsForThisDay != null && bookingsForThisDay.Any())
+                        {
+                            <div class="day-bookings">
+                                @foreach (var booking in bookingsForThisDay.OrderBy(b => b.StartTime)) // Order bookings by time within the day
+                                {
+                                    @* Link to booking details (optional) *@
+                                    <a asp-page="/Booking/Details" asp-route-eventId="@booking.EventId" class="booking-item" title="@booking.LabName @booking.StartTime.ToString("HH:mm")">
+                                        <span class="time">@booking.StartTime.ToString("HH:mm")</span> @booking.LabName
+                                    </a>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="day-number"></div> @* Empty number for other months *@
+                    }
+                </div>
+
+                @if (isCurrentMonth && currentDay > Model.DaysInMonth)
+                {
+                    isCurrentMonth = false; // Stop marking as current month after last day
+                }
+            }
+        </div>
+
+    </div>
+
+    @* --- JavaScript (Copied from Home, stats animation removed) --- *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script src="~/js/student-notifications.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // === THREE.JS BACKGROUND (COPY FROM HOME) ===
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.015);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        camera.position.z = 50;
+        const gridHelper = new THREE.GridHelper(200, 50, 0xff6b35, 0x333333);
+        gridHelper.position.y = -20;
+        gridHelper.material.opacity = 0.3;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+        const rings = [];
+        for (let i = 0; i < 8; i++) {
+            const geometry = new THREE.TorusGeometry(10 + i * 5, 0.2, 16, 100);
+            const material = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0xff6b35 : 0xf7931e, transparent: true, opacity: 0.3, wireframe: true });
+            const ring = new THREE.Mesh(geometry, material);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = -20;
+            rings.push(ring);
+            scene.add(ring);
+        }
+        const nodes = [];
+        const nodeGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+        for (let i = 0; i < 50; i++) {
+            const material = new THREE.MeshStandardMaterial({ color: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e, emissive: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e, emissiveIntensity: 0.8, metalness: 0.9, roughness: 0.1 });
+            const node = new THREE.Mesh(nodeGeometry, material);
+            node.position.set((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 100);
+            nodes.push({ mesh: node, speed: 0.0005 + Math.random() * 0.001, orbit: Math.random() * Math.PI * 2 });
+            scene.add(node);
+        }
+        const helixPoints = [];
+        for (let i = 0; i < 200; i++) {
+            const angle = (i / 200) * Math.PI * 8;
+            const x = Math.cos(angle) * 8;
+            const z = Math.sin(angle) * 8;
+            const y = i * 0.3 - 30;
+            helixPoints.push(new THREE.Vector3(x, y, z));
+        }
+        const helixGeometry = new THREE.BufferGeometry().setFromPoints(helixPoints);
+        const helixMaterial = new THREE.LineBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.4 });
+        const helix = new THREE.Line(helixGeometry, helixMaterial);
+        scene.add(helix);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); scene.add(ambientLight);
+        const lights = [];
+        for (let i = 0; i < 3; i++) {
+            const light = new THREE.PointLight(0xff6b35, 2, 100);
+            lights.push(light);
+            scene.add(light);
+        }
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            rings.forEach((ring, index) => { ring.rotation.z = time * 0.2 + index * 0.1; ring.scale.set(1 + Math.sin(time + index) * 0.1, 1 + Math.sin(time + index) * 0.1, 1); });
+            nodes.forEach((node, index) => { node.orbit += node.speed; const radius = 30 + Math.sin(time + index) * 10; node.mesh.position.x = Math.cos(node.orbit) * radius; node.mesh.position.z = Math.sin(node.orbit) * radius; node.mesh.position.y += Math.sin(time * 2 + index) * 0.02; const pulsate = Math.sin(time * 3 + index) * 0.5 + 0.5; node.mesh.material.emissiveIntensity = 0.5 + pulsate * 0.5; });
+            helix.rotation.y = time * 0.1;
+            gridHelper.position.z = (time * 2) % 4 - 2;
+            lights.forEach((light, index) => { const angle = time * 0.5 + (index * Math.PI * 2 / 3); light.position.x = Math.cos(angle) * 40; light.position.z = Math.sin(angle) * 40; light.position.y = Math.sin(time * 0.3 + index) * 20; });
+            camera.position.x = Math.sin(time * 0.1) * 5;
+            camera.position.y = Math.cos(time * 0.08) * 3;
+            camera.lookAt(0, 0, 0);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler (Giữ nguyên)
+        window.addEventListener('resize', () => {
+             camera.aspect = window.innerWidth / window.innerHeight;
+             camera.updateProjectionMatrix();
+             renderer.setSize(window.innerWidth, window.innerHeight);
+         });
+
+    </script>
+</body>
+</html>

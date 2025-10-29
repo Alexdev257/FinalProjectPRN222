@@ -1,0 +1,56 @@
+﻿@page
+@model FPP.Presentation.Pages.Security.SecurityHomeModel
+@{
+	Layout = "_Layout"; // Can override
+}
+
+<h2>Security Home</h2>
+
+<p>Welcome to the Security Home Page. Here you can manage your security settings and view security-related information.</p>
+
+<div>List of lab event</div>
+
+<table class="table table-bordered table-striped">
+	<thead>
+		<tr>
+			<th>NO.</th>
+			<th>Title</th>
+			<th>Lab Name</th>
+			<th>Zone Name</th>
+			<th>Activity Type</th>
+			<th>Organizer Names</th>
+			<th>Status</th>
+			<th>Start Date</th>
+			<th>End Date</th>
+			<th>
+				View Details
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		@{
+			int count = 1;
+		}
+		@foreach (var labEvent in Model.LabEvents)
+		{
+			<tr>
+				<td>@(count++)</td>
+				<td>@labEvent.Title</td>
+				<td>@(labEvent.Lab?.Name ?? "N/A")</td>
+				<td>@(labEvent.Zone.Name ?? "N/A")</td>
+				<td>@(labEvent.ActivityType.Name ?? "N/A")</td>
+				<td>@(labEvent.Organizer.Name ?? "N/A")</td>
+				<td>@(labEvent.Status ?? "N/A")</td>
+				<td>@(labEvent.StartTime.ToString() ?? "N/A")</td>
+				<td>@(labEvent.EndTime.ToString() ?? "N/A")</td>
+				<td>
+					<a asp-page="SecurityDetails"
+					   asp-route-id="@labEvent.EventId"
+					   class="btn btn-primary btn-sm">
+						View Details
+					</a>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

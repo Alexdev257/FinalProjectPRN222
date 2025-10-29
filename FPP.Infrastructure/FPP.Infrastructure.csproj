@@ -18,6 +18,9 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.9" />
+		<PackageReference Include="StackExchange.Redis" Version="2.9.17" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 	</ItemGroup>
 
   <ItemGroup>
@@ -26,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Implements\Helpers\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
-
 </Project>

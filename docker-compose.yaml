@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=swd392;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;Encrypt=False
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lip-network
+    restart: on-failure
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+    networks:
+      - lip-network
+
+volumes:
+  mssql_data:
+
+networks:
+  lip-network:
+    driver: bridge

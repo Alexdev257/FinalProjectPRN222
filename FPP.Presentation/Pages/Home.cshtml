@@ -1,7 +1,1354 @@
 ﻿@page
 @model FPP.Presentation.Pages.HomeModel
 @{
-    
+    ViewData["Title"] = "FPT Lab Dashboard";
+    Layout = null;
 }
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
-<h1>Home after logging in successfully!</h1>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #000;
+            overflow-x: hidden;
+            color: white;
+            perspective: 1000px;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hud-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6b35, transparent);
+            animation: scanMove 4s linear infinite;
+            box-shadow: 0 0 20px #ff6b35;
+        }
+
+        .corner-frame {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #ff6b35;
+            opacity: 0.6;
+        }
+
+            .corner-frame.tl {
+                top: 20px;
+                left: 20px;
+                border-right: none;
+                border-bottom: none;
+            }
+
+            .corner-frame.tr {
+                top: 20px;
+                right: 20px;
+                border-left: none;
+                border-bottom: none;
+            }
+
+            .corner-frame.bl {
+                bottom: 20px;
+                left: 20px;
+                border-right: none;
+                border-top: none;
+            }
+
+            .corner-frame.br {
+                bottom: 20px;
+                right: 20px;
+                border-left: none;
+                border-top: none;
+            }
+
+        .main-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            padding: 100px 60px 60px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 25px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+            z-index: 100;
+            pointer-events: all;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+            letter-spacing: 3px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-item {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+            .nav-item::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: #ff6b35;
+                transition: width 0.3s;
+            }
+
+            .nav-item:hover {
+                color: #ff6b35;
+            }
+
+                .nav-item:hover::after {
+                    width: 100%;
+                }
+
+            .nav-item.active {
+                color: #ff6b35;
+            }
+
+                .nav-item.active::after {
+                    width: 100%;
+                }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Notification Bell */
+        .notification-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #ff6b35;
+            transition: all 0.3s;
+            padding: 10px;
+        }
+
+            .notification-icon:hover {
+                transform: scale(1.1);
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff6b35;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+            .notification-badge.show {
+                display: flex;
+            }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 420px;
+            max-height: 600px;
+            background: rgba(10, 10, 10, 0.98);
+            border: 1px solid rgba(255, 107, 53, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+            .notification-panel.show {
+                display: flex;
+            }
+
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-panel-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .notification-panel-header h3 {
+                color: #ff6b35;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.2rem;
+            }
+
+        .close-panel {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+            .close-panel:hover {
+                color: #ff6b35;
+                transform: rotate(90deg);
+            }
+
+        .notification-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+            .notification-list::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .notification-list::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .notification-list::-webkit-scrollbar-thumb {
+                background: rgba(255, 107, 53, 0.5);
+                border-radius: 4px;
+            }
+
+        .notification-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+            .notification-item:hover {
+                background: rgba(255, 107, 53, 0.1);
+                border-color: rgba(255, 107, 53, 0.3);
+            }
+
+            .notification-item.unread {
+                background: rgba(255, 107, 53, 0.05);
+                border-left: 3px solid #ff6b35;
+            }
+
+        .notification-unread-dot {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+
+        .notification-content {
+            padding-right: 20px;
+        }
+
+        .notification-message {
+            color: white;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .notification-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-approved {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .status-rejected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+
+        .notification-details {
+            color: #999;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .notification-time {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .notification-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+            .notification-empty i {
+                font-size: 3rem;
+                margin-bottom: 15px;
+                opacity: 0.3;
+            }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+            .user-profile:hover {
+                background: rgba(255, 107, 53, 0.2);
+                box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+            }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 80px;
+            pointer-events: all;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #ff6b35, #f7931e, #fff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease infinite;
+            letter-spacing: 5px;
+            filter: drop-shadow(0 0 40px rgba(255, 107, 53, 0.6));
+            margin-top: 30px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #ccc;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ff6b35;
+            text-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 1rem;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        .labs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+            pointer-events: all;
+        }
+
+        .lab-card {
+            position: relative;
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+            .lab-card::before {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                background: linear-gradient(135deg, #ff6b35, #f7931e, transparent);
+                border-radius: 20px;
+                z-index: -1;
+                opacity: 0;
+                transition: opacity 0.5s;
+                filter: blur(20px);
+            }
+
+            .lab-card:hover::before {
+                opacity: 0.6;
+            }
+
+            .lab-card:hover {
+                transform: translateY(-20px) rotateX(5deg);
+                box-shadow: 0 30px 80px rgba(255, 107, 53, 0.4);
+                border-color: #ff6b35;
+            }
+
+        .lab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .lab-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .lab-status {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .status-available {
+            background: rgba(0, 255, 100, 0.2);
+            color: #00ff64;
+            border: 1px solid #00ff64;
+        }
+
+        .status-busy {
+            background: rgba(255, 50, 50, 0.2);
+            color: #ff3232;
+            border: 1px solid #ff3232;
+        }
+
+        .lab-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .lab-description {
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .book-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            margin-top: auto;
+        }
+
+            .book-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 40px rgba(255, 107, 53, 0.6);
+            }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 80px;
+            pointer-events: all;
+        }
+
+        .action-card {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .action-card:hover {
+                transform: translateY(-10px);
+                border-color: #ff6b35;
+                box-shadow: 0 20px 60px rgba(255, 107, 53, 0.4);
+            }
+
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .action-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .action-desc {
+            color: #999;
+            font-size: 0.95rem;
+        }
+
+        /* Toast Notification */
+        .notification-toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            min-width: 350px;
+            max-width: 450px;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid rgba(255, 107, 53, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 10000;
+            animation: slideIn 0.5s ease-out;
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+        }
+
+        .toast-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+            .toast-header i {
+                font-size: 1.2rem;
+            }
+
+        .toast-time {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .toast-body {
+            color: white;
+        }
+
+            .toast-body p {
+                margin: 0 0 8px 0;
+            }
+
+            .toast-body small {
+                color: #999;
+                line-height: 1.6;
+                display: block;
+            }
+
+        @@keyframes scanMove {
+            0% {
+                top: 0;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        @@keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @@keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        @@media (max-width: 1024px) {
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .labs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+
+            .navbar {
+                padding: 20px 30px;
+            }
+
+            .main-container {
+                padding: 80px 30px 40px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .notification-panel {
+                width: calc(100vw - 40px);
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="hud-overlay">
+        <div class="scan-line"></div>
+        <div class="corner-frame tl"></div>
+        <div class="corner-frame tr"></div>
+        <div class="corner-frame bl"></div>
+        <div class="corner-frame br"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="logo">FPT LAB</div>
+        <div class="nav-menu">
+            <a asp-page="/Home" class="nav-item active">Home</a>
+            <a asp-page="/MyBookings" class="nav-item">My Bookings</a>
+            <a asp-page="/Schedule" class="nav-item">Schedule</a>
+            <a asp-page="/CreateBooking" class="nav-item">Book Lab</a>
+        </div>
+        @if (Model.CurrentUser != null)
+        {
+            <div style="display: flex; align-items: center; justify-content: space-around; gap: 20px;">
+                <!-- Thêm hình chuông thông báo trên header -->
+                @* <div class="notification-icon" onclick="toggleNotificationPanel()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">@(Model.UnreadNotificationCount > 0 ? Model.UnreadNotificationCount : "")</span>
+                </div> *@
+                <div class="user-profile">
+                    <div class="user-avatar">👤</div>
+                    <div>
+                        <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
+                        <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <form method="post" asp-page-handler="Logout" style="margin-left: auto;">
+                        <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </nav>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-panel-header">
+            <h3><i class="fas fa-bell"></i> Notifications</h3>
+            <button class="close-panel" onclick="toggleNotificationPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <div class="notification-empty">
+                <i class="fas fa-bell-slash"></i>
+                <h4>No notifications</h4>
+                <p>You're all caught up!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="hero-section">
+            <h1 class="hero-title">LAB DASHBOARD</h1>
+            <p class="hero-subtitle">Your Gateway to FPT Labs</p>
+
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalLabsStat">@Model.TotalLabCount</div>
+                    <div class="stat-label">TOTAL LABS</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="availableLabsStat">@Model.AvailableLabCount</div>
+                    <div class="stat-label">AVAILABLE NOW</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="myBookingsStat">@Model.MyUpcomingBookingsCount</div>
+                    <div class="stat-label">MY UPCOMING</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="notificationsStat">@Model.UnreadNotificationCount</div>
+                    <div class="stat-label">NOTIFICATIONS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a asp-page="/CreateBooking" class="action-card">
+                <div class="action-icon">⚡</div>
+                <div class="action-title">Book a Lab</div>
+                <div class="action-desc">Find and reserve a lab</div>
+            </a>
+            <a asp-page="/Schedule" class="action-card">
+                <div class="action-icon">📅</div>
+                <div class="action-title">View Schedule</div>
+                <div class="action-desc">Check lab availability</div>
+            </a>
+            <a asp-page="/MyBookings" class="action-card">
+                <div class="action-icon">🎟️</div>
+                <div class="action-title">My Bookings</div>
+                <div class="action-desc">Manage your reservations</div>
+            </a>
+            <a href="#" onclick="toggleNotificationPanel(); return false;" class="action-card">
+                <div class="action-icon">🔔</div>
+                <div class="action-title">Notifications</div>
+                <div class="action-desc"><span id="notificationCountText">@Model.UnreadNotificationCount</span> new alert@(Model.UnreadNotificationCount != 1 ? "s" : "")</div>
+            </a>
+        </div>
+
+        <div class="labs-grid" id="labsGrid">
+            @foreach (var lab in Model.LabsList)
+            {
+                var statusClass = lab.IsAvailableNow ? "status-available" : "status-busy";
+                var statusText = lab.IsAvailableNow ? "AVAILABLE" : "BUSY NOW";
+                string icon = "🏢";
+                if (lab.Name.Contains("AI")) icon = "🤖";
+                else if (lab.Name.Contains("IoT")) icon = "⚡";
+                else if (lab.Name.Contains("Network")) icon = "🔐";
+                else if (lab.Name.Contains("Software")) icon = "💻";
+                else if (lab.Name.Contains("Cloud")) icon = "☁️";
+                else if (lab.Name.Contains("Data")) icon = "📊";
+
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-icon">@icon</div>
+                        <div class="lab-status @statusClass">@statusText</div>
+                    </div>
+                    <h3 class="lab-title">@lab.Name</h3>
+                    <p class="lab-description">@(lab.Description ?? "N/A")</p>
+                    <a asp-page="/CreateBooking" asp-route-labId="@lab.LabId" class="book-btn">Book Now</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // === SignalR Connection for Student Notifications ===
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationBookingHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveStudentNotification", function (notification) {
+            console.log("Received student notification:", notification);
+            showToastNotification(notification);
+            playNotificationSound();
+            loadNotifications(); // Reload notifications
+            updateStatsCounter(); // Update stats
+        });
+
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log('Could not play sound:', e);
+            }
+        }
+
+        connection.start()
+            .then(function () {
+                console.log("SignalR Connected!");
+                loadNotifications();
+            })
+            .catch(function (err) {
+                console.error("SignalR Connection Error: ", err);
+                setTimeout(() => connection.start(), 5000);
+            });
+
+        // Load notifications from database
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/Home?handler=Notifications');
+                const data = await response.json();
+
+                if (data.success) {
+                    displayNotifications(data.notifications);
+                    updateBadgeCount(data.notifications);
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        // Display notifications in panel
+        function displayNotifications(notifications) {
+            const listElement = document.getElementById('notificationList');
+
+            if (!notifications || notifications.length === 0) {
+                listElement.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="fas fa-bell-slash"></i>
+                        <h4>No notifications</h4>
+                        <p>You're all caught up!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listElement.innerHTML = notifications.map(notif => {
+                const timeAgo = getTimeAgo(new Date(notif.sentAt));
+                const unreadClass = !notif.isRead ? 'unread' : '';
+                const unreadDot = !notif.isRead ? '<span class="notification-unread-dot"></span>' : '';
+
+                const statusClass = notif.eventDetails.status === 'Approved' ? 'status-approved' :
+                                   notif.eventDetails.status === 'Rejected' ? 'status-rejected' : '';
+                const statusBadge = notif.eventDetails.status ?
+                    `<span class="notification-status ${statusClass}">${notif.eventDetails.status}</span>` : '';
+
+                return `
+                    <div class="notification-item ${unreadClass}"
+                         data-notification-id="${notif.notificationId}"
+                         data-is-read="${notif.isRead}"
+                         onclick="handleNotificationClick(${notif.notificationId}, ${notif.isRead})">
+                        ${unreadDot}
+                        <div class="notification-content">
+                            <div class="notification-message">${notif.message}</div>
+                            ${statusBadge}
+                            <div class="notification-details">
+                                🏢 ${notif.eventDetails.lab || ''} - ${notif.eventDetails.zone || ''}<br>
+                                📅 ${new Date(notif.eventDetails.startTime).toLocaleDateString('en-GB')}<br>
+                                ⏰ ${new Date(notif.eventDetails.startTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})} -
+                                    ${new Date(notif.eventDetails.endTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})}<br>
+                                📝 ${notif.eventDetails.title || ''}
+                            </div>
+                            <span class="notification-time">${timeAgo}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update badge count
+        function updateBadgeCount(notifications) {
+            const unreadCount = notifications.filter(n => !n.isRead).length;
+            const badge = document.getElementById('notificationBadge');
+            const statsElement = document.getElementById('notificationsStat');
+            const countText = document.getElementById('notificationCountText');
+
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount;
+                    badge.classList.add('show');
+                } else {
+                    badge.classList.remove('show');
+                }
+            }
+
+            if (statsElement) {
+                statsElement.textContent = unreadCount;
+            }
+
+            if (countText) {
+                countText.textContent = unreadCount;
+            }
+        }
+
+        // Update stats counter after receiving notification
+        async function updateStatsCounter() {
+            try {
+                const response = await fetch('/Home?handler=UnreadCount');
+                const data = await response.json();
+
+                if (data.success) {
+                    const statsElement = document.getElementById('notificationsStat');
+                    const countText = document.getElementById('notificationCountText');
+
+                    if (statsElement) {
+                        animateValue('notificationsStat', parseInt(statsElement.textContent), data.count, 500);
+                    }
+
+                    if (countText) {
+                        countText.textContent = data.count;
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating counter:', error);
+            }
+        }
+
+        // Handle notification click
+        async function handleNotificationClick(notificationId, isRead) {
+            if (!isRead) {
+                try {
+                    const response = await fetch(`/Home?handler=MarkAsRead&notificationId=${notificationId}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    });
+
+                    if (response.ok) {
+                        const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                        if (notifElement) {
+                            notifElement.classList.remove('unread');
+                            const dot = notifElement.querySelector('.notification-unread-dot');
+                            if (dot) dot.remove();
+                            notifElement.setAttribute('data-is-read', 'true');
+                        }
+
+                        loadNotifications();
+                    }
+                } catch (error) {
+                    console.error('Error marking as read:', error);
+                }
+            }
+        }
+
+        // Toggle notification panel
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notificationPanel');
+            panel.classList.toggle('show');
+
+            if (panel.classList.contains('show')) {
+                loadNotifications();
+            }
+        }
+
+        // Close panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('notificationPanel');
+            const icon = document.querySelector('.notification-icon');
+
+            if (panel.classList.contains('show') &&
+                !panel.contains(event.target) &&
+                !icon.contains(event.target)) {
+                panel.classList.remove('show');
+            }
+        });
+
+        // Get time ago string
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
+
+            return date.toLocaleDateString('en-GB');
+        }
+
+        // Show toast notification
+        function showToastNotification(notification) {
+            try {
+                const toast = document.createElement('div');
+                toast.className = 'notification-toast';
+
+                const title = notification.title || "Booking Update";
+                const message = notification.message || "";
+                const status = notification.status || "";
+                const timestamp = notification.timestamp || new Date();
+
+                const details = notification.bookingDetails || {};
+                const lab = details.lab || "Unknown Lab";
+                const zone = details.zone || "Unknown Zone";
+                const date = details.date || "";
+                const startTime = details.startTime || "";
+                const endTime = details.endTime || "";
+                const activity = details.activity || "";
+
+                const statusIcon = status === 'Approved' ? '✅' : status === 'Rejected' ? '❌' : '📬';
+
+                toast.innerHTML = `
+                    <div class="toast-header">
+                        <i class="fas fa-bell"></i>
+                        <strong>${statusIcon} ${title}</strong>
+                        <span class="toast-time">${new Date(timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <div class="toast-body">
+                        <p><strong>${message}</strong></p>
+                        <small>
+                            🏢 ${lab} - ${zone}<br>
+                            📅 ${date}<br>
+                            ⏰ ${startTime} - ${endTime}<br>
+                            📝 ${activity}
+                        </small>
+                    </div>
+                `;
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.5s ease-out';
+                    setTimeout(() => toast.remove(), 500);
+                }, 5000);
+
+                console.log("Toast displayed successfully");
+            } catch (error) {
+                console.error("Error showing toast:", error);
+            }
+        }
+
+        // Load notifications on page load
+        window.addEventListener('load', function() {
+            loadNotifications();
+        });
+
+        // Reconnect on visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && connection.state === signalR.HubConnectionState.Disconnected) {
+                connection.start();
+            }
+        });
+
+        // === THREE.JS BACKGROUND ===
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.015);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        camera.position.z = 50;
+
+        const gridHelper = new THREE.GridHelper(200, 50, 0xff6b35, 0x333333);
+        gridHelper.position.y = -20;
+        gridHelper.material.opacity = 0.3;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+
+        const rings = [];
+        for (let i = 0; i < 8; i++) {
+            const geometry = new THREE.TorusGeometry(10 + i * 5, 0.2, 16, 100);
+            const material = new THREE.MeshBasicMaterial({
+                color: i % 2 === 0 ? 0xff6b35 : 0xf7931e,
+                transparent: true,
+                opacity: 0.3,
+                wireframe: true
+            });
+            const ring = new THREE.Mesh(geometry, material);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = -20;
+            rings.push(ring);
+            scene.add(ring);
+        }
+
+        const nodes = [];
+        const nodeGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+        for (let i = 0; i < 50; i++) {
+            const material = new THREE.MeshStandardMaterial({
+                color: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e,
+                emissive: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e,
+                emissiveIntensity: 0.8,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            const node = new THREE.Mesh(nodeGeometry, material);
+            node.position.set(
+                (Math.random() - 0.5) * 100,
+                (Math.random() - 0.5) * 60,
+                (Math.random() - 0.5) * 100
+            );
+            nodes.push({
+                mesh: node,
+                speed: 0.0005 + Math.random() * 0.001,
+                orbit: Math.random() * Math.PI * 2
+            });
+            scene.add(node);
+        }
+
+        const helixPoints = [];
+        for (let i = 0; i < 200; i++) {
+            const angle = (i / 200) * Math.PI * 8;
+            const x = Math.cos(angle) * 8;
+            const z = Math.sin(angle) * 8;
+            const y = i * 0.3 - 30;
+            helixPoints.push(new THREE.Vector3(x, y, z));
+        }
+        const helixGeometry = new THREE.BufferGeometry().setFromPoints(helixPoints);
+        const helixMaterial = new THREE.LineBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.4 });
+        const helix = new THREE.Line(helixGeometry, helixMaterial);
+        scene.add(helix);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        const lights = [];
+        for (let i = 0; i < 3; i++) {
+            const light = new THREE.PointLight(0xff6b35, 2, 100);
+            lights.push(light);
+            scene.add(light);
+        }
+
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            rings.forEach((ring, index) => {
+                ring.rotation.z = time * 0.2 + index * 0.1;
+                ring.scale.set(
+                    1 + Math.sin(time + index) * 0.1,
+                    1 + Math.sin(time + index) * 0.1,
+                    1
+                );
+            });
+
+            nodes.forEach((node, index) => {
+                node.orbit += node.speed;
+                const radius = 30 + Math.sin(time + index) * 10;
+                node.mesh.position.x = Math.cos(node.orbit) * radius;
+                node.mesh.position.z = Math.sin(node.orbit) * radius;
+                node.mesh.position.y += Math.sin(time * 2 + index) * 0.02;
+                const pulsate = Math.sin(time * 3 + index) * 0.5 + 0.5;
+                node.mesh.material.emissiveIntensity = 0.5 + pulsate * 0.5;
+            });
+
+            helix.rotation.y = time * 0.1;
+            gridHelper.position.z = (time * 2) % 4 - 2;
+
+            lights.forEach((light, index) => {
+                const angle = time * 0.5 + (index * Math.PI * 2 / 3);
+                light.position.x = Math.cos(angle) * 40;
+                light.position.z = Math.sin(angle) * 40;
+                light.position.y = Math.sin(time * 0.3 + index) * 20;
+            });
+
+            camera.position.x = Math.sin(time * 0.1) * 5;
+            camera.position.y = Math.cos(time * 0.08) * 3;
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Animate stats
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            const range = end - start;
+            if (range === 0) {
+                obj.textContent = end;
+                return;
+            }
+            const increment = end > start ? 1 : -1;
+            const stepTime = range !== 0 ? Math.max(1, Math.abs(Math.floor(duration / range))) : duration;
+            let current = start;
+            const timer = setInterval(() => {
+                current += increment;
+                obj.textContent = current;
+                if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                    obj.textContent = end;
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        window.addEventListener('load', () => {
+            const totalLabsEnd = parseInt(document.getElementById('totalLabsStat')?.textContent || '0');
+            const availableLabsEnd = parseInt(document.getElementById('availableLabsStat')?.textContent || '0');
+            const myBookingsEnd = parseInt(document.getElementById('myBookingsStat')?.textContent || '0');
+            const notificationsEnd = parseInt(document.getElementById('notificationsStat')?.textContent || '0');
+
+            animateValue('totalLabsStat', 0, totalLabsEnd, 1000);
+            animateValue('availableLabsStat', 0, availableLabsEnd, 1200);
+            animateValue('myBookingsStat', 0, myBookingsEnd, 1500);
+            animateValue('notificationsStat', 0, notificationsEnd, 900);
+        });
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+    @Html.AntiForgeryToken()
+</body>
+</html>

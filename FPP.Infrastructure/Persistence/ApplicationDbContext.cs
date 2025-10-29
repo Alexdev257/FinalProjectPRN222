@@ -274,6 +274,12 @@ namespace FPP.Infrastructure.Persistence
                     .HasColumnType("datetime")
                     .HasColumnName("timestamp");
 
+                entity.Property(e => e.Status)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("status")
+                    .HasDefaultValue("Pending Review");
+
                 entity.HasOne(d => d.Event).WithMany(p => p.SecurityLogs)
                     .HasForeignKey(d => d.EventId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
@@ -321,3 +327,4 @@ namespace FPP.Infrastructure.Persistence
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
+ 

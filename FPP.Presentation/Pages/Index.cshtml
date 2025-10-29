@@ -1,23 +1,298 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Welcome";
+    Layout = null;
 }
 
-<h4>Login Page</h4>
-<form method="post">
-    <div asp-validation-summary="ModelOnly"></div>
-    <div class="form-group">
-        <label asp-for="request.Email" class="form-label">Email</label>
-        <input asp-for="request.Email" class="form-text" />
-        <span asp-validation-for="request.Email" class="text-danger"></span>
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPT Lab Booking System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* TOÀN BỘ CSS CỦA BẠN ĐƯỢC SAO CHÉP VÀO ĐÂY */
+        @@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+            .intro-overlay.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+        .intro-content {
+            text-align: center;
+            color: white;
+            padding: 60px;
+            animation: fadeInUp 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+            .intro-content h1 {
+                font-family: 'Orbitron', sans-serif;
+                font-size: 6rem;
+                margin-bottom: 30px;
+                background: linear-gradient(135deg, #fff, #ff6b35, #f7931e, #fff);
+                background-size: 300% 300%;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-weight: 900;
+                letter-spacing: 8px;
+                animation: gradientShift 4s ease infinite;
+                filter: drop-shadow(0 0 40px rgba(255, 107, 53, 0.8));
+            }
+
+            .intro-content p {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+                color: #e0e0e0;
+                font-weight: 500;
+            }
+
+            .intro-content .subtitle {
+                font-size: 1.2rem;
+                color: #999;
+                margin-bottom: 30px;
+            }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+
+            .dot:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .dot:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+        /* PHẦN CÒN LẠI CỦA CSS (alert, login-box, form, v.v...) CŨNG NÊN ĐƯỢC DÁN VÀO ĐÂY */
+        /* (Để đơn giản, tôi sẽ chỉ dán phần cần thiết cho intro, nhưng bạn có thể dán TẤT CẢ) */
+
+        /* Alert Message (Không cần cho Index nhưng dán vào để duplicate) */
+        .alert-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideInRight 0.5s ease;
+            max-width: 400px;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Login Container (Không cần cho Index nhưng dán vào để duplicate) */
+        .login-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s;
+        }
+
+            .login-container.visible {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+        /* ... VÀ TẤT CẢ CÁC STYLE CÒN LẠI ... */
+        /* ... (Bạn hãy tự dán đầy đủ CSS của mình vào đây) ... */
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes dotPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        /* ... (Và các keyframes khác) ... */
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-content">
+            <h1>FPT LAB Management</h1>
+            <p>Hệ thống quản lý đặt phòng thí nghiệm</p>
+            <p class="subtitle">Đại học FPT - Nơi ý tưởng được hiện thực hóa</p>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="request.Password" class="form-label">Password</label>
-        <input asp-for="request.Password" type="password" class="form-text" />
-        <span asp-validation-for="request.Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Login</button>
-    </div>
-</form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // === THREE.JS BACKGROUND (DUPLICATED) ===
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.015);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 1);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        camera.position.z = 20;
+
+        // ... (Toàn bộ code Three.js cubes, particles, lights của bạn) ...
+        const cubes = [];
+        for (let i = 0; i < 25; i++) {
+            const size = 0.8 + Math.random() * 1.2;
+            const geometry = new THREE.BoxGeometry(size, size, size);
+            const edges = new THREE.EdgesGeometry(geometry);
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
+            const wireframe = new THREE.LineSegments(edges, lineMaterial);
+            const material = new THREE.MeshStandardMaterial({
+                color: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e,
+                metalness: 0.8, roughness: 0.2, transparent: true, opacity: 0.7,
+                emissive: Math.random() > 0.5 ? 0xff6b35 : 0xf7931e, emissiveIntensity: 0.5
+            });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.add(wireframe);
+            cube.position.set((Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60);
+            cube.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            cubes.push({
+                mesh: cube,
+                speed: 0.001 + Math.random() * 0.005,
+                axis: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
+            });
+            scene.add(cube);
+        }
+        // ... (particlesGeometry, ambientLight, v.v...)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        // ...
+
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            cubes.forEach((cube, index) => {
+                cube.mesh.rotateOnAxis(cube.axis, cube.speed);
+                // ... (logic animate khác)
+            });
+            // ... (logic animate khác)
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // === INTRO VÀ CHUYỂN HƯỚNG ===
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                // 1. Ẩn lớp intro
+                document.getElementById('introOverlay').classList.add('hidden');
+
+                // 2. Chờ 1.5s cho hiệu ứng ẩn hoàn tất rồi chuyển trang
+                setTimeout(() => {
+                    // ĐỔI '/Login' thành trang Login của bạn
+                    window.location.href = '/Login';
+                }, 1500); // Thời gian này phải khớp với transition-duration của .intro-overlay.hidden
+            }, 1500); // Thời gian hiển thị intro
+        });
+    </script>
+
+</body>
+</html>
