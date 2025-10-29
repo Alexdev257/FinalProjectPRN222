@@ -396,8 +396,10 @@ namespace FPP.Presentation.Pages
                         Timestamp = DateTime.Now
                     };
 
+                    //await _hubContext.Clients.Client(connectionId)
+                    //    .SendAsync("ReceiveNotification", notificationMessage);
                     await _hubContext.Clients.Client(connectionId)
-                        .SendAsync("ReceiveNotification", notificationMessage);
+                          .SendAsync("ReceiveSecurityNotification", notificationMessage);
 
                     Console.WriteLine($"Notification sent to security {securityId}");
                 }
