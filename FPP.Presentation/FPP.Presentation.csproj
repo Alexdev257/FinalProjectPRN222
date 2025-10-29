@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Folder Include="Pages\Booking\" />
+    <Folder Include="wwwroot\uploads\security_logs\" />
   </ItemGroup>
 
 </Project>
