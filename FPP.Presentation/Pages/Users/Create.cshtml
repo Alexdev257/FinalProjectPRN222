@@ -1,0 +1,40 @@
+﻿@page
+@model FPP.Presentation.Pages.Users.CreateModel
+@{
+    ViewData["Title"] = "Add User";
+}
+
+<h2>Create New User</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="NewUser.Name"></label>
+        <input asp-for="NewUser.Name" class="form-control" />
+        <span asp-validation-for="NewUser.Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="NewUser.Email"></label>
+        <input asp-for="NewUser.Email" class="form-control" />
+        <span asp-validation-for="NewUser.Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="NewUser.PasswordHash"></label>
+        <input asp-for="NewUser.PasswordHash" type="password" class="form-control" />
+        <span asp-validation-for="NewUser.PasswordHash" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="NewUser.Role"></label>
+        <input asp-for="NewUser.Role" class="form-control" />
+        <span asp-validation-for="NewUser.Role" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-2">Create</button>
+    <a asp-page="./Index" class="btn btn-secondary mt-2">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,17 @@
+﻿@page "{id:int}"
+@model FPP.Presentation.Pages.Users.DeleteModel
+
+<h2>Delete User</h2>
+
+<h4>Are you sure you want to delete this user?</h4>
+<div>
+    <h5>@Model.User.Name</h5>
+    <p>Email: @Model.User.Email</p>
+    <p>Role: @Model.User.Role</p>
+</div>
+
+<form method="post">
+    <input type="hidden" asp-for="User.UserId" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+</form>
