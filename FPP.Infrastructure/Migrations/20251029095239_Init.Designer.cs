@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FPP.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251026042033_Init")]
+    [Migration("20251029095239_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -339,6 +339,14 @@ namespace FPP.Infrastructure.Migrations
                     b.Property<int>("SecurityId")
                         .HasColumnType("int")
                         .HasColumnName("security_id");
+
+                    b.Property<string>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasDefaultValue("Pending Review")
+                        .HasColumnName("status");
 
                     b.Property<DateTime>("Timestamp")
                         .ValueGeneratedOnAdd()

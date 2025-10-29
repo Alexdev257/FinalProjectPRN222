@@ -219,7 +219,8 @@ namespace FPP.Infrastructure.Migrations
                     action = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
                     timestamp = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
                     photo_url = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
-                    notes = table.Column<string>(type: "text", nullable: true)
+                    notes = table.Column<string>(type: "text", nullable: true),
+                    status = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true, defaultValue: "Pending Review")
                 },
                 constraints: table =>
                 {

@@ -175,5 +175,147 @@ namespace FPP.Infrastructure.Implements.Services
             booking.Status = status;
             return await _unitOfWork.CompleteAsync();
         }
+
+        public async Task<LabEvent?> GetBookingWithDetailsAsync(int eventId)
+        {
+            return await _unitOfWork.LabEvents.GetAllAsync()
+            .Include(e => e.Lab)
+            .Include(e => e.Zone)
+            .Include(e => e.Organizer)
+            .Include(e => e.ActivityType)
+            .FirstOrDefaultAsync(e => e.EventId == eventId);
+        }
+
+        public async Task<List<SecurityLog>> GetSecurityLogsByEventIdAsync(int eventId)
+        {
+            return await _unitOfWork.SecurityLogs.GetAllAsync()
+            .Include(l => l.Security)
+            .Where(l => l.EventId == eventId)
+            .OrderByDescending(l => l.Timestamp)
+            .ToListAsync();
+        }
+
+        public async Task<List<EventParticipant>> GetEventParticipantsAsync(int eventId)
+        {
+            return await _unitOfWork.EventParticipants.GetAllAsync()
+            .Include(p => p.User)
+            .Where(p => p.EventId == eventId)
+            .ToListAsync();
+        }
+
+        public async Task<List<SecurityLog>> GetAllSecurityLogsWithDetailsAsync()
+        {
+            return await _unitOfWork.SecurityLogs.GetAllAsync()
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Lab)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Zone)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Organizer)
+                .Include(sl => sl.Security)
+                .OrderByDescending(sl => sl.Timestamp)
+                .ToListAsync();
+        }
+
+        // NEW: Get security logs by lab ID
+        public async Task<List<SecurityLog>> GetSecurityLogsByLabIdAsync(int labId)
+        {
+            return await _unitOfWork.SecurityLogs.GetAllAsync()
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Lab)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Zone)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Organizer)
+                .Include(sl => sl.Security)
+                .Where(sl => sl.Event.LabId == labId)
+                .OrderByDescending(sl => sl.Timestamp)
+                .ToListAsync();
+        }
+
+        // NEW: Get pending security logs (logs without manager notes)
+        public async Task<List<SecurityLog>> GetPendingSecurityLogsAsync()
+        {
+            return await _unitOfWork.SecurityLogs.GetAllAsync()
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Lab)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Zone)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Organizer)
+                .Include(sl => sl.Security)
+                .Where(sl => string.IsNullOrEmpty(sl.Notes) || !sl.Notes.Contains("[Manager Acknowledged]"))
+                .OrderByDescending(sl => sl.Timestamp)
+                .ToListAsync();
+        }
+
+        // NEW: Get security log by ID
+        public async Task<SecurityLog?> GetSecurityLogByIdAsync(int logId)
+        {
+            return await _unitOfWork.SecurityLogs.GetAllAsync()
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Lab)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Zone)
+                .Include(sl => sl.Event)
+                    .ThenInclude(e => e.Organizer)
+                .Include(sl => sl.Security)
+                .FirstOrDefaultAsync(sl => sl.LogId == logId);
+        }
+
+        // NEW: Update security log notes
+        public async Task<bool> UpdateSecurityLogNotesAsync(int logId, string notes)
+        {
+            try
+            {
+                var log = await _unitOfWork.SecurityLogs.GetByIdAsync(logId);
+                if (log == null) return false;
+
+                log.Notes = notes;
+                return await _unitOfWork.CompleteAsync();
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating security log notes: {ex.Message}");
+                return false;
+            }
+        }
+
+        // NEW: Manager acknowledges security log
+        public async Task<bool> AcknowledgeSecurityLogAsync(int logId, int managerId, string note)
+        {
+            try
+            {
+                var log = await _unitOfWork.SecurityLogs.GetByIdAsync(logId);
+                if (log == null) return false;
+
+                var manager = await _unitOfWork.Users.GetByIdAsync(managerId);
+                if (manager == null) return false;
+
+                log.Status = "Acknowledged";
+
+                var acknowledgment = $"[Manager Acknowledged by {manager.Name} at {DateTime.Now:dd/MM/yyyy HH:mm}]\n{note}";
+
+                if (string.IsNullOrEmpty(log.Notes))
+                {
+                    log.Notes = acknowledgment;
+                }
+                else
+                {
+                    log.Notes += $"\n\n{acknowledgment}";
+                }
+
+                var saved =  await _unitOfWork.CompleteAsync();
+                _logger.LogInformation("Security log {LogId} acknowledged by manager {ManagerId}", logId, managerId);
+                return saved;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error acknowledging security log: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

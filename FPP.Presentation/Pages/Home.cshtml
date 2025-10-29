@@ -790,6 +790,11 @@
         @if (Model.CurrentUser != null)
         {
             <div style="display: flex; align-items: center; justify-content: space-around; gap: 20px;">
+                <!-- Thêm hình chuông thông báo trên header -->
+                @* <div class="notification-icon" onclick="toggleNotificationPanel()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge">@(Model.UnreadNotificationCount > 0 ? Model.UnreadNotificationCount : "")</span>
+                </div> *@
                 <div class="user-profile">
                     <div class="user-avatar">👤</div>
                     <div>
@@ -1346,17 +1351,4 @@
     </script>
     @Html.AntiForgeryToken()
 </body>
-</html>="notification-icon" onclick="toggleNotificationPanel()">
-<i class="fas fa-bell"></i>
-<span class="notification-badge" id="notificationBadge">0</span>
-                </div>
-
-<div class="user-profile">
-    <div class="user-avatar">👤</div>
-    <div>
-        <div style="font-weight: 600;">@Model.CurrentUser.Name</div>
-        <div style="font-size: 0.85rem; color: #999;">@Model.CurrentUser.Email</div>
-    </div>
-</div>
-
-<div class
+</html>
