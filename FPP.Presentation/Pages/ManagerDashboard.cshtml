@@ -300,6 +300,62 @@
                 font-size: 1.1rem;
             }
 
+        /* Main Navigation Tabs */
+        .main-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .main-tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            position: relative;
+        }
+
+            .main-tab:hover {
+                color: #ff6b35;
+            }
+
+            .main-tab.active {
+                color: #ff6b35;
+                border-bottom-color: #ff6b35;
+            }
+
+        .tab-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ff6b35;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+
         /* Stats Cards */
         .stats-grid {
             display: grid;
@@ -385,8 +441,8 @@
                 color: white;
             }
 
-        /* Bookings Table */
-        .bookings-section {
+        /* Tables */
+        .bookings-section, .security-logs-section {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 107, 53, 0.3);
             border-radius: 15px;
@@ -403,16 +459,16 @@
             gap: 10px;
         }
 
-        .bookings-table {
+        .bookings-table, .security-logs-table {
             width: 100%;
             border-collapse: collapse;
         }
 
-            .bookings-table thead {
+            .bookings-table thead, .security-logs-table thead {
                 background: rgba(255, 107, 53, 0.1);
             }
 
-            .bookings-table th {
+            .bookings-table th, .security-logs-table th {
                 padding: 15px;
                 text-align: left;
                 font-weight: 600;
@@ -423,16 +479,16 @@
                 border-bottom: 2px solid rgba(255, 107, 53, 0.3);
             }
 
-            .bookings-table td {
+            .bookings-table td, .security-logs-table td {
                 padding: 15px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            .bookings-table tbody tr {
+            .bookings-table tbody tr, .security-logs-table tbody tr {
                 transition: all 0.3s;
             }
 
-                .bookings-table tbody tr:hover {
+                .bookings-table tbody tr:hover, .security-logs-table tbody tr:hover {
                     background: rgba(255, 107, 53, 0.05);
                 }
 
@@ -461,6 +517,18 @@
             background: rgba(244, 67, 54, 0.2);
             color: #f44336;
             border: 1px solid #f44336;
+        }
+
+        .status-acknowledged {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .status-unacknowledged {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
         }
 
         .action-buttons {
@@ -511,53 +579,30 @@
                 color: white;
             }
 
-        /* Toast Notification */
-        .notification-toast {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            min-width: 350px;
-            max-width: 450px;
-            background: rgba(10, 10, 10, 0.95);
-            border: 1px solid rgba(255, 107, 53, 0.5);
-            border-radius: 12px;
-            padding: 15px;
-            z-index: 10000;
-            animation: slideIn 0.5s ease-out;
-            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
-        }
-
-        .toast-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            color: #ff6b35;
-            font-weight: 600;
-        }
-
-            .toast-header i {
-                font-size: 1.2rem;
-            }
-
-        .toast-time {
-            margin-left: auto;
-            font-size: 0.85rem;
-            color: #999;
-        }
-
-        .toast-body {
+        .btn-acknowledge {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
             color: white;
         }
 
-            .toast-body p {
-                margin: 0 0 8px 0;
+            .btn-acknowledge:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
             }
 
-            .toast-body small {
-                color: #999;
-                line-height: 1.6;
-                display: block;
+        /* Photo Preview */
+        .photo-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            transition: all 0.3s;
+        }
+
+            .photo-preview:hover {
+                transform: scale(1.1);
+                border-color: #ff6b35;
             }
 
         /* Modal */
@@ -644,7 +689,92 @@
                 opacity: 0.3;
             }
 
-        /* Animations */
+        /* Toast Notifications */
+        .simple-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 10001;
+            animation: fadeInOut 3s ease-in-out;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+            .simple-toast.success {
+                background: linear-gradient(135deg, #4caf50, #45a049);
+                color: white;
+            }
+
+            .simple-toast.error {
+                background: linear-gradient(135deg, #f44336, #e53935);
+                color: white;
+            }
+
+        @@keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+
+            15%, 85% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .notification-toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            min-width: 350px;
+            max-width: 450px;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid rgba(255, 107, 53, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out forwards;
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+            transition: bottom 0.3s ease;
+        }
+
+        .toast-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+            .toast-header i {
+                font-size: 1.2rem;
+            }
+
+        .toast-time {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .toast-body {
+            color: white;
+        }
+
+            .toast-body p {
+                margin: 0 0 8px 0;
+            }
+
+            .toast-body small {
+                color: #999;
+                line-height: 1.6;
+                display: block;
+            }
+
         @@keyframes slideIn {
             from {
                 transform: translateX(400px);
@@ -669,8 +799,37 @@
             }
         }
 
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
+        #rejectModalBody textarea, #acknowledgeModalBody textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        #rejectError, #acknowledgeError {
+            color: #f44336;
+            display: none;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #confirmModalBody p {
+            font-size: 1.1rem;
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 20px;
         }
 
         /* Responsive */
@@ -683,7 +842,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .bookings-table {
+            .bookings-table, .security-logs-table {
                 font-size: 0.85rem;
             }
 
@@ -699,11 +858,91 @@
                 width: calc(100vw - 40px);
                 right: 20px;
             }
+
+            .main-tabs {
+                overflow-x: auto;
+            }
+
+            .security-log-toast {
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                min-width: 360px;
+                max-width: 460px;
+                background: linear-gradient(135deg, rgba(15, 15, 15, 0.98), rgba(20, 20, 20, 0.98));
+                border: 1px solid rgba(255, 107, 53, 0.5);
+                border-left: 5px solid #ff6b35;
+                border-radius: 14px;
+                padding: 16px;
+                z-index: 10001;
+                animation: slideIn 0.4s ease-out;
+                box-shadow: 0 12px 40px rgba(255, 107, 53, 0.25);
+                backdrop-filter: blur(10px);
+            }
+
+                .security-log-toast .toast-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                    color: #ff6b35;
+                    font-weight: 600;
+                }
+
+                    .security-log-toast .toast-header i {
+                        font-size: 1.3rem;
+                    }
+
+                .security-log-toast .toast-time {
+                    margin-left: auto;
+                    font-size: 0.85rem;
+                    color: #aaa;
+                }
+
+                .security-log-toast .toast-message {
+                    margin: 0 0 8px 0;
+                    font-size: 1rem;
+                    color: white;
+                }
+
+                .security-log-toast .toast-details {
+                    margin-bottom: 12px;
+                }
+
+                    .security-log-toast .toast-details small {
+                        color: #ccc;
+                        line-height: 1.5;
+                        display: block;
+                    }
+
+                    .security-log-toast .toast-details i {
+                        width: 16px;
+                        color: #ff6b35;
+                        margin-right: 4px;
+                    }
+
+            .btn-view-log {
+                background: rgba(255, 107, 53, 0.2);
+                color: #ff6b35;
+                border: 1px solid #ff6b35;
+                padding: 6px 14px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: 0.3s;
+                float: right;
+            }
+
+                .btn-view-log:hover {
+                    background: #ff6b35;
+                    color: white;
+                    transform: translateY(-1px);
+                }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="logo">FPT LAB MANAGER</div>
         <div class="nav-right">
@@ -720,7 +959,6 @@
                     <div style="font-size: 0.85rem; color: #999;">Manager</div>
                 </div>
             </div>
-
             <div class="user-info">
                 <form method="post" asp-page-handler="Logout" style="margin-left: auto;">
                     <button type="submit" style="background:none; border:none; color:#ccc; cursor:pointer; padding: 0;">Logout</button>
@@ -729,7 +967,6 @@
         </div>
     </nav>
 
-    <!-- Notification Panel -->
     <div class="notification-panel" id="notificationPanel">
         <div class="notification-panel-header">
             <h3><i class="fas fa-bell"></i> Notifications</h3>
@@ -746,163 +983,400 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="container">
-        <!-- Dashboard Header -->
         <div class="dashboard-header">
-            <h1>Booking Management</h1>
-            <p>Review and manage lab booking requests</p>
+            <h1>Manager Dashboard</h1>
+            <p>Manage bookings and security logs</p>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="pendingCount">@Model.PendingCount</div>
-                <div class="stat-label">Pending Requests</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="approvedCount">@Model.ApprovedCount</div>
-                <div class="stat-label">Approved Today</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="rejectedCount">@Model.RejectedCount</div>
-                <div class="stat-label">Rejected Today</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                </div>
-                <div class="stat-value" id="totalCount">@Model.TotalCount</div>
-                <div class="stat-label">Total Bookings</div>
-            </div>
+        <!-- Main Navigation Tabs -->
+        <div class="main-tabs">
+            <button class="main-tab active" onclick="switchMainTab('bookings')">
+                <i class="fas fa-calendar-alt"></i> Bookings
+                <span class="tab-badge" id="bookingsBadge">@Model.PendingCount</span>
+            </button>
+            <button class="main-tab" onclick="switchMainTab('security')">
+                <i class="fas fa-shield-alt"></i> Security Logs
+                <span class="tab-badge" id="securityBadge">@Model.PendingSecurityLogsCount</span>
+            </button>
         </div>
 
-        <!-- Filter Tabs -->
-        <div class="filter-tabs">
-            <div class="filter-tab active" data-status="all" onclick="filterBookings('all')">
-                <i class="fas fa-list"></i> All Bookings
+        <!-- Bookings Tab Content -->
+        <div id="bookingsTab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="pendingCount">@Model.PendingCount</div>
+                    <div class="stat-label">Pending Requests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="approvedCount">@Model.ApprovedCount</div>
+                    <div class="stat-label">Approved Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="rejectedCount">@Model.RejectedCount</div>
+                    <div class="stat-label">Rejected Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalCount">@Model.TotalCount</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
             </div>
-            <div class="filter-tab" data-status="pending" onclick="filterBookings('pending')">
-                <i class="fas fa-clock"></i> Pending
-            </div>
-            <div class="filter-tab" data-status="approved" onclick="filterBookings('approved')">
-                <i class="fas fa-check"></i> Approved
-            </div>
-            <div class="filter-tab" data-status="rejected" onclick="filterBookings('rejected')">
-                <i class="fas fa-times"></i> Rejected
-            </div>
-        </div>
 
-        <!-- Bookings Table -->
-        <div class="bookings-section">
-            <h2 class="section-title">
-                <i class="fas fa-calendar-alt"></i>
-                Booking Requests
-            </h2>
-            <div id="bookingsTableContainer">
-                <table class="bookings-table">
-                    <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Lab / Zone</th>
-                            <th>Date & Time</th>
-                            <th>Activity</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bookingsTableBody">
-                        @foreach (var booking in Model.Bookings)
-                        {
-                            <tr data-status="@booking.Status.ToLower()">
-                                <td>
-                                    <strong>@booking.Organizer.Name</strong><br>
-                                    <small style="color: #999;">@booking.Organizer.Email</small>
-                                </td>
-                                <td>
-                                    <strong>@booking.Lab.Name</strong><br>
-                                    <small style="color: #999;">@booking.Zone.Name</small>
-                                </td>
-                                <td>
-                                    <strong>@booking.StartTime.ToString("dd/MM/yyyy")</strong><br>
-                                    <small style="color: #999;">@booking.StartTime.ToString("HH:mm") - @booking.EndTime.ToString("HH:mm")</small>
-                                </td>
-                                <td>
-                                    <strong>@booking.Title</strong><br>
-                                    <small style="color: #999;">@booking.ActivityType.Name</small>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-@booking.Status.ToLower()">
-                                        @booking.Status
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        @if (booking.Status == "Pending")
-                                        {
-                                            <button class="btn btn-approve" onclick="approveBooking(@booking.EventId)">
-                                                <i class="fas fa-check"></i> Approve
-                                            </button>
-                                            <button class="btn btn-reject" onclick="rejectBooking(@booking.EventId)">
-                                                <i class="fas fa-times"></i> Reject
-                                            </button>
-                                        }
-                                        <button class="btn btn-view" onclick="viewBookingDetails(@booking.EventId)">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                    </div>
-                                </td>
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-status="all" onclick="filterBookings('all')">
+                    <i class="fas fa-list"></i> All Bookings
+                </div>
+                <div class="filter-tab" data-status="pending" onclick="filterBookings('pending')">
+                    <i class="fas fa-clock"></i> Pending
+                </div>
+                <div class="filter-tab" data-status="approved" onclick="filterBookings('approved')">
+                    <i class="fas fa-check"></i> Approved
+                </div>
+                <div class="filter-tab" data-status="rejected" onclick="filterBookings('rejected')">
+                    <i class="fas fa-times"></i> Rejected
+                </div>
+            </div>
+
+            <div class="bookings-section">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Booking Requests
+                </h2>
+                <div id="bookingsTableContainer">
+                    <table class="bookings-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Lab / Zone</th>
+                                <th>Date & Time</th>
+                                <th>Activity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-                @if (Model.Bookings.Count == 0)
-                {
-                    <div class="empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <h3>No bookings found</h3>
-                        <p>There are no booking requests at the moment.</p>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            @foreach (var booking in Model.Bookings)
+                            {
+                                <tr data-status="@booking.Status.ToLower()">
+                                    <td>
+                                        <strong>@booking.Organizer.Name</strong><br>
+                                        <small style="color: #999;">@booking.Organizer.Email</small>
+                                    </td>
+                                    <td>
+                                        <strong>@booking.Lab.Name</strong><br>
+                                        <small style="color: #999;">@booking.Zone.Name</small>
+                                    </td>
+                                    <td>
+                                        <strong>@booking.StartTime.ToString("dd/MM/yyyy")</strong><br>
+                                        <small style="color: #999;">@booking.StartTime.ToString("HH:mm") - @booking.EndTime.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <strong>@booking.Title</strong><br>
+                                        <small style="color: #999;">@booking.ActivityType.Name</small>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-@booking.Status.ToLower()">
+                                            @booking.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            @if (booking.Status == "Pending")
+                                            {
+                                                <button class="btn btn-approve" onclick="approveBooking(@booking.EventId, event)">
+                                                    <i class="fas fa-check"></i> Approve
+                                                </button>
+                                                <button class="btn btn-reject" onclick="rejectBooking(@booking.EventId)">
+                                                    <i class="fas fa-times"></i> Reject
+                                                </button>
+                                            }
+                                            <button class="btn btn-view" onclick="viewBookingDetails(@booking.EventId)">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    @if (Model.Bookings.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No bookings found</h3>
+                            <p>There are no booking requests at the moment.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Logs Tab Content -->
+        <div id="securityTab" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
                     </div>
-                }
+                    <div class="stat-value" id="pendingSecurityCount">@Model.PendingSecurityLogsCount</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="acknowledgedCount">@(Model.SecurityLogs.Count(sl => sl.Status == "Acknowledged"))</div>
+                    <div class="stat-label">Acknowledged</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalSecurityLogs">@Model.SecurityLogs.Count</div>
+                    <div class="stat-label">Total Logs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="todaySecurityLogs">@Model.SecurityLogs.Count(l => l.Timestamp.Date == DateTime.Today)</div>
+                    <div class="stat-label">Today's Logs</div>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-security-status="all" onclick="filterSecurityLogs('all')">
+                    <i class="fas fa-list"></i> All Logs
+                </div>
+                <div class="filter-tab" data-security-status="unacknowledged" onclick="filterSecurityLogs('unacknowledged')">
+                    <i class="fas fa-exclamation-circle"></i> Pending Review
+                </div>
+                <div class="filter-tab" data-security-status="acknowledged" onclick="filterSecurityLogs('acknowledged')">
+                    <i class="fas fa-check-circle"></i> Acknowledged
+                </div>
+            </div>
+
+            <div class="security-logs-section">
+                <h2 class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Security Logs
+                </h2>
+                <div id="securityLogsTableContainer">
+                    <table class="security-logs-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Security Officer</th>
+                                <th>Action</th>
+                                <th>Event Details</th>
+                                <th>Photo</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="securityLogsTableBody">
+                            @foreach (var log in Model.SecurityLogs)
+                            {
+                                var statusClass = log.Status == "Acknowledged" ? "acknowledged" : "unacknowledged";
+                                var statusText = log.Status == "Acknowledged" ? "Acknowledged" : "Pending Review";
+                                <tr data-security-status="@statusClass">
+                                    <td>
+                                        <strong>@log.Timestamp.ToString("dd/MM/yyyy")</strong><br>
+                                        <small style="color: #999;">@log.Timestamp.ToString("HH:mm:ss")</small>
+                                    </td>
+                                    <td>
+                                        <strong>@log.Security.Name</strong><br>
+                                        <small style="color: #999;">@log.Security.Email</small>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-@log.Action.ToLower()">
+                                            @log.Action
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>@log.Event.Title</strong><br>
+                                        <small style="color: #999;">@log.Event.Lab.Name - @log.Event.Zone.Name</small><br>
+                                        <small style="color: #999;">Organizer: @log.Event.Organizer.Name</small>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(log.PhotoUrl))
+                                        {
+                                            <img src="@log.PhotoUrl" alt="Security Photo" class="photo-preview" onclick="viewPhoto('@log.PhotoUrl')">
+                                        }
+                                        else
+                                        {
+                                            <small style="color: #666;">No photo</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-@statusClass">
+                                            @statusText
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            @if (log.Status != "Acknowledged")
+                                            {
+                                                <button class="btn btn-acknowledge" onclick="acknowledgeLog(@log.LogId)">
+                                                    <i class="fas fa-check"></i> Acknowledge
+                                                </button>
+                                            }
+                                            <button class="btn btn-view" onclick="viewSecurityLogDetails(@log.LogId)">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    @if (Model.SecurityLogs.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>No security logs found</h3>
+                            <p>There are no security logs at the moment.</p>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal for Booking Details -->
+    <!-- Modals -->
     <div class="modal" id="bookingModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-info-circle"></i> Booking Details</h2>
-                <button class="close-modal" onclick="closeModal()">
+                <button class="close-modal" onclick="closeModal('bookingModal')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="modalBody">
-                <!-- Details will be loaded here -->
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="securityLogModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Security Log Details</h2>
+                <button class="close-modal" onclick="closeModal('securityLogModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="securityLogModalBody"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="photoModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-image"></i> Security Photo</h2>
+                <button class="close-modal" onclick="closeModal('photoModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="photoModalBody" style="text-align: center;">
+                <img id="fullPhoto" src="" alt="Security Photo" style="max-width: 100%; border-radius: 8px;">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="rejectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-comment-slash"></i> Reject Booking</h2>
+                <button class="close-modal" onclick="closeRejectModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="rejectModalBody">
+                <p style="color: #999; margin-bottom: 15px;">Please provide a reason for rejecting this booking.</p>
+                <textarea id="rejectionReason" rows="5" placeholder="e.g., Lab is scheduled for maintenance..."></textarea>
+                <small id="rejectError">Reason cannot be empty.</small>
+                <div class="modal-actions">
+                    <button class="btn btn-view" onclick="closeRejectModal()">Cancel</button>
+                    <button class="btn btn-reject" id="submitRejectBtn" onclick="submitRejection()">Submit Rejection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="acknowledgeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-check-circle"></i> Acknowledge Security Log</h2>
+                <button class="close-modal" onclick="closeAcknowledgeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="acknowledgeModalBody">
+                <p style="color: #999; margin-bottom: 15px;">Add a note to acknowledge this security log.</p>
+                <textarea id="acknowledgmentNote" rows="5" placeholder="e.g., Reviewed and approved. No further action needed."></textarea>
+                <small id="acknowledgeError">Note cannot be empty.</small>
+                <div class="modal-actions">
+                    <button class="btn btn-view" onclick="closeAcknowledgeModal()">Cancel</button>
+                    <button class="btn btn-acknowledge" id="submitAcknowledgeBtn" onclick="submitAcknowledgment()">Submit Acknowledgment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="confirmModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2 id="confirmModalTitle"><i class="fas fa-question-circle"></i> Confirm Action</h2>
+                <button class="close-modal" onclick="closeConfirmModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="confirmModalBody">
+                <p id="confirmModalText">Are you sure you want to proceed?</p>
+                <div class="modal-actions">
+                    <button class="btn btn-view" onclick="closeConfirmModal()">Cancel</button>
+                    <button class="btn btn-approve" id="confirmModalButton" onclick="">Confirm</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script>
-        // SignalR Connection
+        // --- GLOBAL VARIABLES ---
+        let currentEventIdToReject = null;
+        let currentEventIdToApprove = null;
+        let currentLogIdToAcknowledge = null;
+        let approveButtonElement = null;
+
+        // --- SIGNALR CONNECTION ---
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/notificationBookingHub")
             .withAutomaticReconnect()
@@ -912,10 +1386,20 @@
             console.log("Received notification:", notification);
             showToastNotification(notification);
             playNotificationSound();
-            loadNotifications(); // Reload notifications
+            loadNotifications();
             setTimeout(() => {
-                refreshBookings();
-            }, 5500);
+                refreshDashboard();
+            }, 2800);
+        });
+
+        connection.on("ReceiveSecurityLogNotification", function (notification) {
+            console.log("Received notification:", notification);
+            showToastSecurityLogsNotification(notification);
+            playNotificationSound();
+            loadNotifications();
+            setTimeout(() => {
+                refreshDashboard();
+            }, 2800);
         });
 
         function playNotificationSound() {
@@ -923,16 +1407,12 @@
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-
                 oscillator.frequency.value = 1000;
                 oscillator.type = 'sine';
-
                 gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.3);
             } catch (e) {
@@ -943,19 +1423,27 @@
         connection.start()
             .then(function () {
                 console.log("SignalR Connected!");
-                loadNotifications(); // Load notifications on connect
+                loadNotifications();
             })
             .catch(function (err) {
                 console.error("SignalR Connection Error: ", err);
                 setTimeout(() => connection.start(), 5000);
             });
 
-        // Load notifications from database
+        // --- TAB MANAGEMENT ---
+        function switchMainTab(tabName) {
+            document.querySelectorAll('.main-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.closest('.main-tab').classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // --- NOTIFICATION MANAGEMENT ---
         async function loadNotifications() {
             try {
                 const response = await fetch('/ManagerDashboard?handler=Notifications');
                 const data = await response.json();
-
                 if (data.success) {
                     displayNotifications(data.notifications);
                     updateBadgeCount(data.notifications);
@@ -965,18 +1453,15 @@
             }
         }
 
-        // Display notifications in panel
         function displayNotifications(notifications) {
             const listElement = document.getElementById('notificationList');
-
             if (!notifications || notifications.length === 0) {
                 listElement.innerHTML = `
                     <div class="notification-empty">
                         <i class="fas fa-bell-slash"></i>
                         <h4>No notifications</h4>
                         <p>You're all caught up!</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
@@ -984,7 +1469,6 @@
                 const timeAgo = getTimeAgo(new Date(notif.sentAt));
                 const unreadClass = !notif.isRead ? 'unread' : '';
                 const unreadDot = !notif.isRead ? '<span class="notification-unread-dot"></span>' : '';
-
                 return `
                     <div class="notification-item ${unreadClass}"
                          data-notification-id="${notif.notificationId}"
@@ -998,20 +1482,17 @@
                                 🏢 ${notif.eventDetails.lab || ''} - ${notif.eventDetails.zone || ''}<br>
                                 📅 ${new Date(notif.eventDetails.startTime).toLocaleDateString('en-GB')}<br>
                                 ⏰ ${new Date(notif.eventDetails.startTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})} -
-                                    ${new Date(notif.eventDetails.endTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})}
+                                   ${new Date(notif.eventDetails.endTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})}
                             </div>
                             <span class="notification-time">${timeAgo}</span>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         }
 
-        // Update badge count
         function updateBadgeCount(notifications) {
             const unreadCount = notifications.filter(n => !n.isRead).length;
             const badge = document.getElementById('notificationBadge');
-
             if (unreadCount > 0) {
                 badge.textContent = unreadCount;
                 badge.classList.add('show');
@@ -1020,7 +1501,6 @@
             }
         }
 
-        // Handle notification click
         async function handleNotificationClick(notificationId, isRead) {
             if (!isRead) {
                 try {
@@ -1030,9 +1510,7 @@
                             'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                         }
                     });
-
                     if (response.ok) {
-                        // Update UI
                         const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
                         if (notifElement) {
                             notifElement.classList.remove('unread');
@@ -1040,8 +1518,6 @@
                             if (dot) dot.remove();
                             notifElement.setAttribute('data-is-read', 'true');
                         }
-
-                        // Reload to update badge
                         loadNotifications();
                     }
                 } catch (error) {
@@ -1050,49 +1526,39 @@
             }
         }
 
-        // Toggle notification panel
         function toggleNotificationPanel() {
             const panel = document.getElementById('notificationPanel');
             panel.classList.toggle('show');
-
             if (panel.classList.contains('show')) {
                 loadNotifications();
             }
         }
 
-        // Close panel when clicking outside
         document.addEventListener('click', function(event) {
             const panel = document.getElementById('notificationPanel');
             const icon = document.querySelector('.notification-icon');
-
-            if (panel.classList.contains('show') &&
-                !panel.contains(event.target) &&
-                !icon.contains(event.target)) {
+            if (panel.classList.contains('show') && !panel.contains(event.target) && !icon.contains(event.target)) {
                 panel.classList.remove('show');
             }
         });
 
-        // Get time ago string
         function getTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
-
             if (seconds < 60) return 'Just now';
             if (seconds < 3600) return Math.floor(seconds / 60) + ' minutes ago';
             if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
             if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
-
             return date.toLocaleDateString('en-GB');
         }
 
+        // --- TOAST NOTIFICATIONS ---
         function showToastNotification(notification) {
             try {
                 const toast = document.createElement('div');
                 toast.className = 'notification-toast';
-
                 const title = notification.title || "New Notification";
                 const message = notification.message || "";
                 const timestamp = notification.timestamp || new Date();
-
                 const details = notification.bookingDetails || {};
                 const lab = details.lab || "Unknown Lab";
                 const zone = details.zone || "Unknown Zone";
@@ -1101,7 +1567,6 @@
                 const endTime = details.endTime || "";
                 const userName = details.userName || "Unknown User";
                 const activity = details.activity || "";
-
                 toast.innerHTML = `
                     <div class="toast-header">
                         <i class="fas fa-bell"></i>
@@ -1117,28 +1582,103 @@
                             ⏰ ${startTime} - ${endTime}<br>
                             📝 ${activity}
                         </small>
-                    </div>
-                `;
-
+                    </div>`;
+                // document.body.appendChild(toast);
+                // setTimeout(() => {
+                //     toast.style.animation = 'slideOut 0.4s ease-out';
+                //     setTimeout(() => toast.remove(), 400);
+                // }, 3000);
                 document.body.appendChild(toast);
-
+                // Hiển thị ngay lập tức
+                requestAnimationFrame(() => {
+                    toast.style.animation = 'slideIn 0.3s ease-out forwards';
+                });
+                // Xếp chồng toast
+                const toasts = document.querySelectorAll('.notification-toast');
+                toasts.forEach((t, i) => {
+                    t.style.bottom = `${20 + i * 110}px`; // Cách nhau 110px
+                    t.style.top = 'auto';
+                });
+                // Ẩn sau 2.5s, hiệu ứng ra 0.3s
                 setTimeout(() => {
-                    toast.style.animation = 'slideOut 0.5s ease-out';
-                    setTimeout(() => toast.remove(), 500);
-                }, 5000);
-
-                console.log("Toast displayed successfully");
+                    toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, 2500); // Tổng: 2.8s
             } catch (error) {
                 console.error("Error showing toast:", error);
             }
         }
 
+        function showToastSecurityLogsNotification(notification){
+                // Tạo toast element
+            const toast = document.createElement('div');
+            toast.className = 'notification-toast security-log-toast';
+
+            // Format thời gian
+            const time = new Date(notification.timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // HTML nội dung toast
+            toast.innerHTML = `
+                <div class="toast-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <strong>${notification.title || "Security Log"}</strong>
+                    <span class="toast-time">${time}</span>
+                </div>
+                <div class="toast-body">
+                    <p class="toast-message"><strong>${notification.eventDetails.action}</strong></p>
+                    <div class="toast-details">
+                        <small>
+                            <i class="fas fa-building"></i> <strong>Lab:</strong> ${notification.eventDetails.lab || "—"}<br>
+                            <i class="fas fa-map-marker-alt"></i> <strong>Zone:</strong> ${notification.eventDetails.zone || "—"}<br>
+                            <i class="fas fa-calendar"></i> <strong>Event ID:</strong> #${notification.eventDetails.eventId}
+                        </small>
+                    </div>
+                </div>
+            `;
+
+            // Thêm vào body
+            document.body.appendChild(toast);
+
+            // Tự động ẩn sau 3.5s
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.4s ease-out forwards';
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+        function viewEventFromToast(eventId) {
+            // Tự động mở modal và load chi tiết
+            viewEvent(eventId);
+
+            // Tắt toast ngay (tùy chọn)
+            document.querySelectorAll('.security-log-toast').forEach(t => {
+                t.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => t.remove(), 300);
+            });
+        }
+
+        function showSimpleToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `simple-toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // --- BOOKING FILTERS ---
         function filterBookings(status) {
-            document.querySelectorAll('.filter-tab').forEach(tab => {
+            document.querySelectorAll('.filter-tab[data-status]').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.closest('.filter-tab').classList.add('active');
-
+            const activeTab = document.querySelector(`.filter-tab[data-status="${status}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
             const rows = document.querySelectorAll('#bookingsTableBody tr');
             rows.forEach(row => {
                 if (status === 'all' || row.dataset.status === status) {
@@ -1149,8 +1689,94 @@
             });
         }
 
-        async function approveBooking(eventId) {
-            if (!confirm('Are you sure you want to approve this booking?')) return;
+        // --- SECURITY LOG FILTERS ---
+        function filterSecurityLogs(status) {
+            document.querySelectorAll('.filter-tab[data-security-status]').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            const activeTab = document.querySelector(`.filter-tab[data-security-status="${status}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+            const rows = document.querySelectorAll('#securityLogsTableBody tr');
+            rows.forEach(row => {
+                if (status === 'all' || row.dataset.securityStatus === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // --- DASHBOARD REFRESH ---
+        async function refreshDashboard() {
+            try {
+                const response = await fetch(window.location.href);
+                if (!response.ok) throw new Error('Failed to fetch new data');
+
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+
+                // Cập nhật stats
+                ['pendingCount', 'approvedCount', 'rejectedCount', 'totalCount',
+                 'pendingSecurityCount', 'acknowledgedCount', 'totalSecurityLogs', 'todaySecurityLogs'].forEach(id => {
+                    const el = doc.getElementById(id);
+                    if (el) document.getElementById(id).innerHTML = el.innerHTML;
+                });
+
+                // Cập nhật bảng
+                const newBookings = doc.getElementById('bookingsTableContainer');
+                if (newBookings) {
+                    document.getElementById('bookingsTableContainer').innerHTML = newBookings.innerHTML;
+                }
+
+                const newSecurity = doc.getElementById('securityLogsTableContainer'); // <-- ĐÃ SỬA
+                if (newSecurity) {
+                    document.getElementById('securityLogsTableContainer').innerHTML = newSecurity.innerHTML; // <-- ĐÃ SỬA
+                }
+
+                // Cập nhật badge
+                ['bookingsBadge', 'securityBadge'].forEach(id => {
+                    const el = doc.getElementById(id);
+                    if (el) document.getElementById(id).textContent = el.textContent;
+                });
+
+                // Reset filter
+                filterSecurityLogs('all');
+                filterBookings('all');
+            } catch (error) {
+                console.error('Error refreshing dashboard:', error);
+                location.reload();
+            }
+        }
+
+        // --- BOOKING ACTIONS ---
+        async function approveBooking(eventId, event) {
+            currentEventIdToApprove = eventId;
+            approveButtonElement = event.target.closest('.btn-approve');
+
+            document.getElementById('confirmModalTitle').innerHTML = `<i class="fas fa-question-circle"></i> Approve Booking`;
+            document.getElementById('confirmModalText').innerText = 'Are you sure you want to approve this booking request?';
+
+            const confirmBtn = document.getElementById('confirmModalButton');
+            confirmBtn.innerHTML = 'Confirm Approve';
+            confirmBtn.className = 'btn btn-approve';
+            confirmBtn.onclick = confirmApproveAction;
+
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        async function confirmApproveAction() {
+            const eventId = currentEventIdToApprove;
+            const button = approveButtonElement;
+
+            if (!eventId || !button) return;
+
+            closeConfirmModal();
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
             try {
                 const response = await fetch(`/ManagerDashboard?handler=Approve&eventId=${eventId}`, {
@@ -1161,21 +1787,57 @@
                 });
 
                 if (response.ok) {
-                    alert('Booking approved successfully!');
-                    location.reload();
+                    showSimpleToast('Booking approved successfully!', 'success');
+                    await refreshDashboard();
+                } else {
+                    let errorMessage = 'Failed to approve booking.';
+                    try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.message) errorMessage = errorData.message;
+                    } catch (e) { }
+                    showSimpleToast(errorMessage, 'error');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check"></i> Approve';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to approve booking');
+                showSimpleToast('An error occurred while approving.', 'error');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check"></i> Approve';
             }
         }
 
-        async function rejectBooking(eventId) {
-            const reason = prompt('Please enter rejection reason:');
-            if (!reason) return;
+        function rejectBooking(eventId) {
+            currentEventIdToReject = eventId;
+            document.getElementById('rejectionReason').value = '';
+            document.getElementById('rejectError').style.display = 'none';
+            document.getElementById('rejectModal').style.display = 'flex';
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').style.display = 'none';
+            currentEventIdToReject = null;
+        }
+
+        async function submitRejection() {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            const errorEl = document.getElementById('rejectError');
+
+            if (!reason) {
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            errorEl.style.display = 'none';
+
+            if (!currentEventIdToReject) return;
+
+            const submitBtn = document.getElementById('submitRejectBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
             try {
-                const response = await fetch(`/ManagerDashboard?handler=Reject&eventId=${eventId}&reason=${encodeURIComponent(reason)}`, {
+                const response = await fetch(`/ManagerDashboard?handler=Reject&eventId=${currentEventIdToReject}&reason=${encodeURIComponent(reason)}`, {
                     method: 'POST',
                     headers: {
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
@@ -1183,35 +1845,235 @@
                 });
 
                 if (response.ok) {
-                    alert('Booking rejected successfully!');
-                    location.reload();
+                    closeRejectModal();
+                    showSimpleToast('Booking rejected successfully!', 'success');
+                    await refreshDashboard();
+                } else {
+                    let errorMessage = 'Failed to reject booking.';
+                    try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.message) errorMessage = errorData.message;
+                    } catch (e) { }
+                    showSimpleToast(errorMessage, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to reject booking');
+                showSimpleToast('An error occurred while rejecting.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Rejection';
             }
         }
 
         function viewBookingDetails(eventId) {
             const modal = document.getElementById('bookingModal');
+            const modalBody = document.getElementById('modalBody');
+
+            const row = event.target.closest('tr');
+            if (!row) {
+                modalBody.innerHTML = '<p>Could not load details.</p>';
+                modal.style.display = 'flex';
+                return;
+            }
+
+            const cells = row.querySelectorAll('td');
+            const student = cells[0].innerHTML;
+            const labZone = cells[1].innerHTML;
+            const dateTime = cells[2].innerHTML;
+            const activity = cells[3].innerHTML;
+            const status = cells[4].innerHTML;
+
+            modalBody.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">Student</div>
+                    <div class="detail-value">${student}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Lab / Zone</div>
+                    <div class="detail-value">${labZone}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Date & Time</div>
+                    <div class="detail-value">${dateTime}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Activity</div>
+                    <div class="detail-value">${activity}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">${status}</div>
+                </div>
+            `;
+
             modal.style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('bookingModal').style.display = 'none';
+        // --- SECURITY LOG ACTIONS ---
+        function acknowledgeLog(logId) {
+            currentLogIdToAcknowledge = logId;
+            document.getElementById('acknowledgmentNote').value = '';
+            document.getElementById('acknowledgeError').style.display = 'none';
+            document.getElementById('acknowledgeModal').style.display = 'flex';
         }
 
-        function refreshBookings() {
-            location.reload();
+        function closeAcknowledgeModal() {
+            document.getElementById('acknowledgeModal').style.display = 'none';
+            currentLogIdToAcknowledge = null;
         }
 
+        async function submitAcknowledgment() {
+            const note = document.getElementById('acknowledgmentNote').value.trim();
+            const errorEl = document.getElementById('acknowledgeError');
+
+            if (!note) {
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            errorEl.style.display = 'none';
+
+            if (!currentLogIdToAcknowledge) return;
+
+            const submitBtn = document.getElementById('submitAcknowledgeBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                const response = await fetch(`/ManagerDashboard?handler=AcknowledgeSecurityLog&logId=${currentLogIdToAcknowledge}&note=${encodeURIComponent(note)}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    closeAcknowledgeModal();
+                    showSimpleToast('Security log acknowledged successfully!', 'success');
+                    await refreshDashboard();
+                } else {
+                    let errorMessage = 'Failed to acknowledge security log.';
+                    try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.message) errorMessage = errorData.message;
+                    } catch (e) { }
+                    showSimpleToast(errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showSimpleToast('An error occurred while acknowledging.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Acknowledgment';
+            }
+        }
+
+        async function viewSecurityLogDetails(logId) {
+            const modal = document.getElementById('securityLogModal');
+            const modalBody = document.getElementById('securityLogModalBody');
+
+            modalBody.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #ff6b35;"></i></div>';
+            modal.style.display = 'flex';
+
+            try {
+                const response = await fetch(`/ManagerDashboard?handler=SecurityLogDetails&logId=${logId}`);
+                const data = await response.json();
+
+                if (data.success && data.log) {
+                    const log = data.log;
+                    const statusBadge = log.status === "Acknowledged"
+                        ? '<span class="status-badge status-acknowledged">Acknowledged</span>'
+                        : '<span class="status-badge status-unacknowledged">Pending Review</span>';
+
+                    const photoSection = log.photoUrl
+                        ? `<div class="detail-row">
+                                <div class="detail-label">Photo</div>
+                                <div class="detail-value">
+                                    <img src="${log.photoUrl}" alt="Security Photo" style="max-width: 100%; border-radius: 8px; cursor: pointer;" onclick="viewPhoto('${log.photoUrl}')">
+                                </div>
+                           </div>`
+                        : '';
+
+                    modalBody.innerHTML = `
+                        <div class="detail-row">
+                            <div class="detail-label">Timestamp</div>
+                            <div class="detail-value">
+                                ${new Date(log.timestamp).toLocaleDateString('en-GB')}
+                                ${new Date(log.timestamp).toLocaleTimeString('en-GB')}
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Action</div>
+                            <div class="detail-value"><span class="status-badge">${log.action}</span></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Security Officer</div>
+                            <div class="detail-value">
+                                <strong>${log.security.name}</strong><br>
+                                <small style="color: #999;">${log.security.email}</small>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Event</div>
+                            <div class="detail-value">
+                                <strong>${log.eventDetails.title}</strong><br>
+                                <small style="color: #999;">${log.eventDetails.lab} - ${log.eventDetails.zone}</small>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Organizer</div>
+                            <div class="detail-value">${log.eventDetails.organizer}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Event Time</div>
+                            <div class="detail-value">
+                                ${new Date(log.eventDetails.startTime).toLocaleDateString('en-GB')}<br>
+                                ${new Date(log.eventDetails.startTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})} -
+                                ${new Date(log.eventDetails.endTime).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'})}
+                            </div>
+                        </div>
+                        ${photoSection}
+                        <div class="detail-row">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${statusBadge}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Notes</div>
+                            <div class="detail-value" style="white-space: pre-wrap;">${log.notes || 'No notes'}</div>
+                        </div>
+                    `;
+                } else {
+                    modalBody.innerHTML = '<p style="color: #f44336;">Failed to load security log details.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading security log details:', error);
+                modalBody.innerHTML = '<p style="color: #f44336;">An error occurred while loading details.</p>';
+            }
+        }
+
+        function viewPhoto(photoUrl) {
+            document.getElementById('fullPhoto').src = photoUrl;
+            document.getElementById('photoModal').style.display = 'flex';
+        }
+
+        // --- MODAL MANAGEMENT ---
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            currentEventIdToApprove = null;
+            approveButtonElement = null;
+        }
+
+        // --- PAGE EVENTS ---
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && connection.state === signalR.HubConnectionState.Disconnected) {
                 connection.start();
             }
         });
 
-        // Load notifications on page load
         window.addEventListener('load', function() {
             loadNotifications();
         });

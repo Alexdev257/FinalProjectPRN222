@@ -23,5 +23,6 @@
         public string? OrganizerName { get; set; }
 
         public string? OrganizerEmail { get; set; }
+        public string? EventTitle { get; set; } = null!;
     }
 }

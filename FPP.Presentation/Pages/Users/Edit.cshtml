@@ -1,0 +1,78 @@
+﻿@page "{id:int}"
+@model FPP.Presentation.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<h2>Edit User</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="EditUser.UserId" />
+
+    <div class="form-group">
+        <label asp-for="EditUser.Name"></label>
+        <input asp-for="EditUser.Name" class="form-control" />
+        <span asp-validation-for="EditUser.Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EditUser.Email"></label>
+        <input asp-for="EditUser.Email" class="form-control" />
+        <span asp-validation-for="EditUser.Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EditUser.CreatedAt"></label>
+        <input asp-for="EditUser.CreatedAt" class="form-control" />
+        <span asp-validation-for="EditUser.CreatedAt" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EditUser.Role"></label>
+        <input asp-for="EditUser.Role" class="form-control" />
+        <span asp-validation-for="EditUser.Role" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Save</button>
+    <a asp-page="./Index" class="btn btn-secondary mt-2">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+<style>
+    body {
+        background: #000;
+        color: white;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    h2 {
+        color: #ff6b35;
+        text-shadow: 0 0 20px rgba(255,107,53,0.6);
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    form {
+        width: 60%;
+        margin: 0 auto;
+        background: rgba(10, 10, 10, 0.7);
+        padding: 25px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,107,53,0.3);
+    }
+
+    .btn-primary {
+        background: #4a90e2;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background: #1e70d1;
+        }
+
+    .btn-secondary {
+        background: #555;
+    }
+</style>

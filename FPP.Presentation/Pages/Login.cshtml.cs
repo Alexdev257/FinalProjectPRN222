@@ -118,7 +118,8 @@ namespace FPP.Presentation.Pages
             }
             else if (result.Role == 3)
             {
-                return RedirectToPage("/Security/SecurityHome");
+                //return RedirectToPage("/Security/SecurityHome");
+                return RedirectToPage("/SecurityDashboard");
             }
             else
             {

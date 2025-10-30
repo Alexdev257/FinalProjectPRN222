@@ -1,4 +1,4 @@
-using FPP.Application.DTOs;
+using FPP.Application.DTOs.LabEvent;
 using FPP.Application.Interface.IServices;
 using FPP.Domain.Entities;
 using FPP.Presentation.Hubs;
