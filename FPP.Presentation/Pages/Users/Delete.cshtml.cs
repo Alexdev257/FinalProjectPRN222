@@ -23,9 +23,9 @@ namespace FPP.Presentation.Pages.Users
         // Hiển thị thông tin user trước khi xác nhận xóa
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            User = await _userService.FindAsync(id);
-            if (User == null)
-                return NotFound();
+            //User = await _userService.FindAsync(id);
+            //if (User == null)
+            //    return NotFound();
 
             return Page();
         }
@@ -33,13 +33,13 @@ namespace FPP.Presentation.Pages.Users
         // Thực hiện xóa sau khi bấm nút Confirm
         public async Task<IActionResult> OnPostAsync()
         {
-            var existingUser = await _userService.FindAsync(User.UserId);
-            if (existingUser == null)
-                return NotFound();
+            //var existingUser = await _userService.FindAsync(User.UserId);
+            //if (existingUser == null)
+            //    return NotFound();
 
-            await _userService.Delete(existingUser.UserId);
+            //await _userService.Delete(existingUser.UserId);
 
-            TempData["Message"] = "User deleted successfully!";
+            //TempData["Message"] = "User deleted successfully!";
             return RedirectToPage("./Index");
         }
     }
