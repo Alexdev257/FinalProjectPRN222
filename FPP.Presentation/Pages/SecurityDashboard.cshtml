@@ -166,6 +166,7 @@
         }
 
             .notification-panel.show {
+                margin-top: 45px;
                 display: flex;
             }
 
@@ -999,9 +1000,12 @@
                                             <button class="btn btn-view" onclick="viewEvent(@e.EventId)">
                                                 <i class="fas fa-eye"></i> View
                                             </button>
-                                            <button class="btn btn-log" onclick="openLogModal(@e.EventId, '@e.Title')">
-                                                <i class="fas fa-clipboard-check"></i> Log
-                                            </button>
+                                            @if(e.Status.ToLower() == "approved")
+                                            {
+                                                <button class="btn btn-log" onclick="openLogModal(@e.EventId, '@e.Title')">
+                                                    <i class="fas fa-clipboard-check"></i> Log
+                                                </button>
+                                            }
                                         </div>
                                     </td>
                                 </tr>

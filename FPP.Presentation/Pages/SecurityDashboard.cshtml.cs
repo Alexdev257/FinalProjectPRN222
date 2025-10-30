@@ -154,7 +154,7 @@ namespace FPP.Presentation.Pages
                 {
                     var msg = $"Security logged: {action} at {evt.Lab?.Name} - {evt.Title}";
 
-                    await _hubContext.Clients.Group("Managers").SendAsync("ReceiveSecurityLogNotification", new
+                    var notificationMessage = new
                     {
                         Title = "New Security Log",
                         Message = msg,
@@ -166,7 +166,34 @@ namespace FPP.Presentation.Pages
                             Zone = evt.Zone?.Name,
                             Action = action
                         }
-                    });
+                    };
+
+                    var managers = await _userService.GetUsersByRoleAsync(2);
+
+                    foreach (var manager in managers)
+                    {
+                        var connectionId = NotificationBookingHub.GetConnectionId(manager.UserId.ToString());
+                        if (!string.IsNullOrEmpty(connectionId))
+                        {
+                            await _hubContext.Clients.Client(connectionId)
+                                .SendAsync("ReceiveSecurityLogNotification", notificationMessage);
+
+                            Console.WriteLine($"Sent security log notif to Manager {manager.UserId}");
+                        }
+                    }
+                    //await _hubContext.Clients.Group("Managers").SendAsync("ReceiveSecurityLogNotification", new
+                    //{
+                    //    Title = "New Security Log",
+                    //    Message = msg,
+                    //    Timestamp = DateTime.Now,
+                    //    EventDetails = new
+                    //    {
+                    //        EventId = evt.EventId,
+                    //        Lab = evt.Lab?.Name,
+                    //        Zone = evt.Zone?.Name,
+                    //        Action = action
+                    //    }
+                    //});
                 }
 
                 return new JsonResult(new { success = true, message = "Security log created successfully" });
