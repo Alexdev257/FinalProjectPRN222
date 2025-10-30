@@ -18,5 +18,6 @@ namespace FPP.Application.Interface.IServices
         Task<IEnumerable<LabEvent>> GetAllLabEventsAsync();
 
         Task<LabEvent> GetLabEventByIdAsync(int eventId);
+        Task<SecurityLog> GetById(int logId);
     }
 }

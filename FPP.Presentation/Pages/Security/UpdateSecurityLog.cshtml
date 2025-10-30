@@ -1,11 +1,13 @@
 ﻿@page
-@model FPP.Presentation.Pages.Security.CreateSecurityLogModel
+@model FPP.Presentation.Pages.Security.UpdateSecurityLogModel
 @{
+	Layout = "_Layout";
 }
 
-<h2 class="mb-3">Create Security Log</h2>
+<h2 class="mb-3">Update Security Log</h2>
 <form method="post" enctype="multipart/form-data">
-
+	<input type="hidden" asp-for="LogId" />
+	<input type="hidden" asp-for="EventId" />
 	<div class="mb-3">
 		<label asp-for="SecurityLogRequest.Action" class="form-label">Action</label>
 		<input asp-for="SecurityLogRequest.Action" class="form-control" />
@@ -28,3 +30,4 @@
 		Cancel
 	</a>
 </form>
+

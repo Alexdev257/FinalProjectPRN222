@@ -2,9 +2,9 @@
 @model FPP.Presentation.Pages.Security.SecurityLogModel
 
 <h2 class="mb-3">Security Logs</h2>
-<a asp-page="/Security/CreateSecurityLog" 
-asp-route-eventId="@Model.EventId"
-class="btn btn-primary mb-3">Create New Log</a>
+<a asp-page="/Security/CreateSecurityLog"
+   asp-route-eventId="@Model.EventId"
+   class="btn btn-primary mb-3">Create New Log</a>
 
 <a asp-page="/Security/SecurityDetails"
    asp-route-id="@Model.EventId"
@@ -41,6 +41,26 @@ class="btn btn-primary mb-3">Create New Log</a>
 					{
 						<span>No Image</span>
 					}
+				</td>
+				<td>
+					<a asp-page="/Security/UpdateSecurityLog"
+					   asp-route-logId="@log.LogId"
+					   asp-route-eventId="@Model.EventId"
+					   class="btn btn-primary btn-sm">
+						Update
+					</a>
+				</td>
+				<td>
+					<form method="post" asp-page-handler="Delete" style="display:inline;">
+						<input type="hidden" name="logId" value="@log.LogId" />
+						<input type="hidden" name="eventId" value="@Model.EventId" />
+						<button type="submit"
+								class="btn btn-danger btn-sm"
+								onclick="return confirm('Are you sure you want to delete this log?');">
+							Delete
+						</button>
+					</form>
+
 				</td>
 			</tr>
 		}

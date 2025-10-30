@@ -43,5 +43,10 @@ namespace FPP.Presentation.Pages.Security
 
             return Page();
         }
+        public async Task<IActionResult> OnPostDeleteAsync(int logId, int eventId)
+        {
+            await _securityLogService.DeleteSecurityLogAsync(logId);
+            return RedirectToPage("/Security/SecurityLog", new { eventId });
+        }
     }
 }

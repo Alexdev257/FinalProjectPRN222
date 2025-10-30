@@ -103,7 +103,7 @@ namespace FPP.Infrastructure.Implements.Services
             var securityLogs = await _unitOfWork.SecurityLogs.Query()
                 .Include(sl => sl.Event.Lab)
                 .Include(sl => sl.Event.Zone)
-                .Include(sl => sl.Event.Organizer) 
+                .Include(sl => sl.Event.Organizer)
                 .Where(sl => sl.EventId == labEventId)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -177,6 +177,16 @@ namespace FPP.Infrastructure.Implements.Services
                 OrganizerName = securityLog.Result.Event.Organizer.Name,
                 OrganizerEmail = securityLog.Result.Event.Organizer.Email
             });
+        }
+        public async Task<SecurityLog> GetById(int logId)
+        {
+            var log = await _unitOfWork.SecurityLogs.GetByIdAsync(logId);
+            if (log == null)
+            {
+                _logger.LogError("Security log with ID {LogId} not found for update.", logId);
+                throw new Exception("Security log not found.");
+            }
+            return log;
         }
 
         public Task<SecurityLogResponse> UpdateSecurityLogAsync(int logId, SecurityLogRequest securityLogRequest)
