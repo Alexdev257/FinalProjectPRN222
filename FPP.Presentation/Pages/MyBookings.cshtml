@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Lab Management"; ;
     Layout = null; // Giả sử không dùng Layout chung
+
+    ViewData["Title"] = "My Bookings";
+    Layout = null;
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -13,7 +16,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="~/css/notifications.css" />
     <style>
-        /* --- TOÀN BỘ CSS ĐÃ SAO CHÉP TỪ Home.cshtml --- */
         @@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
         * {
@@ -170,6 +172,7 @@
                 .nav-item.active::after {
                     width: 100%;
                 }
+
         .user-profile {
             display: flex;
             align-items: center;
@@ -198,10 +201,9 @@
             font-size: 1.2rem;
         }
 
-        /* Page specific styles */
         .page-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 4rem; /* Slightly smaller than hero */
+            font-size: 4rem;
             font-weight: 700;
             text-align: center;
             margin-bottom: 40px;
@@ -225,32 +227,32 @@
 
         .bookings-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Adjust minmax for smaller cards */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
             pointer-events: all;
         }
 
         .booking-card {
             background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(15px); /* Slightly less blur */
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 107, 53, 0.3);
             border-radius: 15px;
-            padding: 25px; /* Smaller padding */
+            padding: 25px;
             transition: all 0.3s ease-in-out;
-            display: flex; /* Use flexbox for layout */
-            flex-direction: column; /* Stack items vertically */
+            display: flex;
+            flex-direction: column;
         }
 
             .booking-card:hover {
                 border-color: #ff6b35;
                 box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
-                transform: translateY(-5px); /* Smaller hover effect */
+                transform: translateY(-5px);
             }
 
         .booking-card-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start; /* Align status to top right */
+            align-items: flex-start;
             margin-bottom: 15px;
         }
 
@@ -273,9 +275,9 @@
             font-weight: 600;
             text-transform: uppercase;
             border: 1px solid;
-            white-space: nowrap; /* Prevent status text wrapping */
+            white-space: nowrap;
         }
-        /* Status colors */
+
         .status-Approved {
             background: rgba(0, 255, 100, 0.1);
             color: #00ff64;
@@ -305,7 +307,6 @@
             color: #4a90e2;
             border-color: #4a90e2;
         }
-        /* Example for past */
 
         .booking-details p {
             font-size: 1rem;
@@ -315,17 +316,17 @@
         }
 
             .booking-details p strong {
-                color: #ff9a70; /* Lighter orange for labels */
-                min-width: 90px; /* Align labels */
+                color: #ff9a70;
+                min-width: 90px;
                 display: inline-block;
             }
 
         .booking-actions {
-            margin-top: auto; /* Push buttons to the bottom */
-            padding-top: 20px; /* Space above buttons */
+            margin-top: auto;
+            padding-top: 20px;
             display: flex;
             gap: 10px;
-            justify-content: flex-end; /* Align buttons to the right */
+            justify-content: flex-end;
         }
 
         .btn {
@@ -338,7 +339,7 @@
             border: none;
             text-decoration: none;
             text-align: center;
-            white-space: nowrap; /* Prevent button text wrapping */
+            white-space: nowrap;
         }
 
         .btn-cancel {
@@ -351,7 +352,7 @@
                 background: rgba(255, 50, 50, 0.4);
             }
 
-        .btn-details { /* Optional details button */
+        .btn-details {
             background: rgba(0, 100, 255, 0.2);
             color: #4a90e2;
             border: 1px solid #4a90e2;
@@ -367,7 +368,7 @@
             font-size: 1.2rem;
             padding: 40px;
         }
-        /* Basic Alert Styles (Optional) */
+
         .alert {
             padding: 15px;
             margin-bottom: 20px;
@@ -387,69 +388,216 @@
             border-color: #f5c6cb;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-in-out;
+        }
 
-        /* --- Keyframes & Media Queries (Copied from Home.cshtml) --- */
+            .modal-overlay.active {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+        .modal-content {
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid #ff6b35;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(255, 107, 53, 0.5);
+            animation: modalSlideIn 0.4s ease-out;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 50, 50, 0.2);
+            border: 2px solid #ff3232;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #ff3232;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .modal-body {
+            margin-bottom: 30px;
+        }
+
+        .modal-text {
+            font-size: 1.1rem;
+            color: #ddd;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .modal-booking-info {
+            background: rgba(255, 107, 53, 0.1);
+            border-left: 3px solid #ff6b35;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+            .modal-booking-info p {
+                font-size: 0.95rem;
+                color: #ccc;
+                margin: 5px 0;
+            }
+
+            .modal-booking-info strong {
+                color: #ff6b35;
+            }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .modal-btn-cancel {
+            background: transparent;
+            color: #999;
+            border-color: #666;
+        }
+
+            .modal-btn-cancel:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: #999;
+                color: #ddd;
+            }
+
+        .modal-btn-confirm {
+            background: rgba(255, 50, 50, 0.3);
+            color: #ff3232;
+            border-color: #ff3232;
+        }
+
+            .modal-btn-confirm:hover {
+                background: rgba(255, 50, 50, 0.5);
+                box-shadow: 0 0 20px rgba(255, 50, 50, 0.4);
+            }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+
+        }
+
+        @@keyframes modalSlideIn {
+            from
+
+        {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        }
+
         @@keyframes scanMove {
-            0% {
-                top: 0;
-            }
+            0%
 
-            100% {
-                top: 100%;
-            }
+        {
+            top: 0;
         }
 
-        @@keyframes gradientShift {
-            0%, 100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
+        100% {
+            top: 100%;
         }
 
-        @@keyframes shimmer {
-            0% {
-                transform: translateX(-100%);
-            }
-
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        @@keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
         }
 
         @@media (max-width: 1024px) {
-            .bookings-grid {
-                grid-template-columns: 1fr;
-            }
-            /* Adjust grid for booking cards */
+            .bookings-grid
+
+        {
+            grid-template-columns: 1fr;
+        }
+
         }
 
         @@media (max-width: 768px) {
-            .navbar {
-                padding: 20px 30px;
-            }
+            .navbar
 
-            .main-container {
-                padding: 80px 30px 40px;
-            }
-
-            .nav-menu {
-                display: none;
-            }
+        {
+            padding: 20px 30px;
         }
 
+        .main-container {
+            padding: 80px 30px 40px;
+        }
+
+        .nav-menu {
+            display: none;
+        }
+
+        .modal-content {
+            padding: 30px 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+
+        .modal-btn {
+            width: 100%;
+        }
+
+        }
     </style>
 </head>
 <body>
@@ -462,14 +610,33 @@
         <div class="corner-frame br"></div>
     </div>
 
-    @* --- Navbar --- *@
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">⚠️</div>
+                <h3 class="modal-title">Cancel Booking</h3>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+                <div class="modal-booking-info" id="modalBookingInfo">
+                    <!-- Booking info will be inserted here by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-cancel" onclick="closeModal()">Keep Booking</button>
+                <button type="button" class="modal-btn modal-btn-confirm" id="confirmCancelBtn">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar">
         <div class="logo">FPT LAB</div>
         <div class="nav-menu">
             <a asp-page="/Home" class="nav-item">Home</a>
             <a asp-page="/MyBookings" class="nav-item active">My Bookings</a>
             <a asp-page="/Schedule" class="nav-item">Schedule</a>
-            <a asp-page="/CreateBooking" class="nav-item">Book Lab</a> @* Mark Book Lab as active *@
+            <a asp-page="/CreateBooking" class="nav-item">Book Lab</a>
         </div>
         @if (Model.CurrentUser != null)
         {
@@ -493,7 +660,6 @@
     <div class="main-container">
         <h1 class="page-title">My Bookings</h1>
 
-        @* Display Status/Error Messages from TempData *@
         @if (TempData["StatusMessage"] != null)
         {
             <div class="alert alert-success" role="alert">@TempData["StatusMessage"]</div>
@@ -503,7 +669,6 @@
             <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
         }
 
-        @* --- Upcoming Bookings Section --- *@
         <div class="booking-section">
             <h2 class="section-title">Upcoming Bookings</h2>
             @if (Model.UpcomingBookings.Any())
@@ -522,17 +687,14 @@
                             <div class="booking-details">
                                 <p><strong>Title:</strong> @booking.Title</p>
                                 <p><strong>Activity:</strong> @booking.ActivityTypeName</p>
-                                <p><strong>Starts:</strong> @booking.StartTime.ToString("g")</p> @* Format: 10/26/2025 2:00 PM *@
+                                <p><strong>Starts:</strong> @booking.StartTime.ToString("g")</p>
                                 <p><strong>Ends:</strong> @booking.EndTime.ToString("g")</p>
                             </div>
                             <div class="booking-actions">
-                                @* Optional Details Button
-                                <a asp-page="/Booking/Details" asp-route-eventId="@booking.EventId" class="btn btn-details">Details</a> *@
-
                                 @if (booking.CanCancel)
                                 {
-                                    <form method="post" asp-page-handler="Cancel" asp-route-eventId="@booking.EventId" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
-                                        <button type="submit" class="btn btn-cancel">Cancel</button>
+                                    <form method="post" asp-page-handler="Cancel" asp-route-eventId="@booking.EventId" class="cancel-form" id="cancelForm-@booking.EventId">
+                                        <button type="button" class="btn btn-cancel" onclick="showCancelModal('@booking.EventId', '@booking.LabName', '@booking.Title', '@booking.StartTime.ToString("g")')">Cancel</button>
                                     </form>
                                 }
                             </div>
@@ -546,7 +708,6 @@
             }
         </div>
 
-        @* --- Past Bookings Section --- *@
         <div class="booking-section">
             <h2 class="section-title">Past Bookings</h2>
             @if (Model.PastBookings.Any())
@@ -560,7 +721,6 @@
                                     <h4>@booking.LabName</h4>
                                     <p>@booking.ZoneName</p>
                                 </div>
-                                @* Hiển thị status, ví dụ Completed hoặc Finished *@
                                 <span class="booking-status status-@booking.Status">@booking.Status</span>
                             </div>
                             <div class="booking-details">
@@ -569,7 +729,6 @@
                                 <p><strong>Started:</strong> @booking.StartTime.ToString("g")</p>
                                 <p><strong>Ended:</strong> @booking.EndTime.ToString("g")</p>
                             </div>
-                            @* No actions for past bookings *@
                         </div>
                     }
                 </div>
@@ -579,15 +738,61 @@
                 <p class="no-bookings">You have no past bookings.</p>
             }
         </div>
-
     </div>
 
-    @* --- JavaScript (Copied from Home, stats animation removed) --- *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script src="~/js/student-notifications.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // === THREE.JS BACKGROUND (COPY FROM HOME) ===
+        // Modal functionality
+        let currentEventId = null;
+
+        function showCancelModal(eventId, labName, title, startTime) {
+            currentEventId = eventId;
+            const modal = document.getElementById('cancelModal');
+            const bookingInfo = document.getElementById('modalBookingInfo');
+
+            bookingInfo.innerHTML = `
+                <p><strong>Lab:</strong> ${labName}</p>
+                <p><strong>Title:</strong> ${title}</p>
+                <p><strong>Start Time:</strong> ${startTime}</p>
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('cancelModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            currentEventId = null;
+        }
+
+        document.getElementById('confirmCancelBtn').addEventListener('click', function() {
+            if (currentEventId) {
+                const form = document.getElementById('cancelForm-' + currentEventId);
+                if (form) {
+                    form.submit();
+                }
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // THREE.JS BACKGROUND
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x000000, 0.015);
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -632,7 +837,8 @@
         const helixMaterial = new THREE.LineBasicMaterial({ color: 0xff6b35, transparent: true, opacity: 0.4 });
         const helix = new THREE.Line(helixGeometry, helixMaterial);
         scene.add(helix);
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); scene.add(ambientLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
         const lights = [];
         for (let i = 0; i < 3; i++) {
             const light = new THREE.PointLight(0xff6b35, 2, 100);
@@ -655,23 +861,11 @@
         }
         animate();
 
-        // Resize handler (Giữ nguyên)
         window.addEventListener('resize', () => {
-             camera.aspect = window.innerWidth / window.innerHeight;
-             camera.updateProjectionMatrix();
-             renderer.setSize(window.innerWidth, window.innerHeight);
-         });
-
-        // Add confirmation for cancel buttons (optional alternative)
-        /*
-        document.querySelectorAll('form[asp-page-handler="Cancel"]').forEach(form => {
-            form.addEventListener('submit', function(event) {
-                if (!confirm('Are you sure you want to cancel this booking?')) {
-                    event.preventDefault();
-                }
-            });
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-        */
     </script>
 </body>
 </html>
